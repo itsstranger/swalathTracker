@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
 import {
   Card,
@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import type { SwalathEntry } from '@/lib/types';
 import {
@@ -78,19 +78,18 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    if (range === 'week') {
-      const last7Days = subDays(now, 6);
-      return sortedEntries.filter(entry => new Date(entry.id) >= last7Days);
-    }
-    if (range === 'month') {
-        const last30Days = subDays(now, 29);
-        return sortedEntries.filter(entry => new Date(entry.id) >= last30Days);
-    }
-    if (range === 'year') {
-        const last365Days = subDays(now, 364);
-        return sortedEntries.filter(entry => new Date(entry.id) >= last365Days);
-    }
-    return [];
+    let daysToSubtract = 7;
+    if (range === 'month') daysToSubtract = 30;
+    if (range === 'year') daysToSubtract = 365;
+    
+    const startDate = subDays(now, daysToSubtract - 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    return sortedEntries.filter(entry => {
+        const entryDate = new Date(entry.id);
+        entryDate.setHours(0,0,0,0);
+        return entryDate >= startDate;
+    });
   }, [sortedEntries, range]);
 
   
@@ -137,109 +136,116 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     <>
       <Card className="rounded-2xl border shadow-sm">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-                <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
-                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
-                <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
+            <div className="flex items-center justify-between">
+                <CardTitle>History & Stats</CardTitle>
+                <div className="flex items-center gap-2">
+                    <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
+                    <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
+                    <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
+                </div>
             </div>
-          </div>
+            <CardDescription>{dateRangeLabel}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="rounded-xl shadow-none border-none bg-card">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
-                    <Sigma className="w-3 h-3 mr-1" />
-                    Total
-                  </Badge>
-                </div>
-                <p className="text-4xl font-bold">{totalSwalaths}</p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">{dateRangeLabel}</p>
-              </CardContent>
-            </Card>
-            <Card className="rounded-xl shadow-none border-none bg-card">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
-                    <Percent className="w-3 h-3 mr-1" />
-                    Average
-                  </Badge>
-                </div>
-                <p className="text-4xl font-bold">{averageCompletion}%</p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">{dateRangeLabel}</p>
-              </CardContent>
-            </Card>
-          </div>
-        
-          <Card className="rounded-xl shadow-none border-none bg-card">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                    <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
-                        <BarChart className="w-3 h-3 mr-1" />
-                        Activity Chart
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{range.charAt(0).toUpperCase() + range.slice(1)}</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {chartData.length > 0 ? (
-                  <ChartContainer config={chartConfig} className="h-40 w-full">
-                    <RechartsBarChart data={chartData} margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
-                      <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent indicator="dot" />}
-                      />
-                      <Bar 
-                        dataKey="total"
-                        radius={10} 
-                        fill="hsl(var(--primary))"
-                        barSize={range === 'year' ? 5 : (range === 'month' ? 10 : 20)}
-                      />
-                    </RechartsBarChart>
-                  </ChartContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground">No data for this period.</p>
-                  </div>
-                )}
-              </CardContent>
-          </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Total Count Section */}
+                <Card className="rounded-xl shadow-none border-none bg-card lg:col-span-1">
+                    <CardHeader className="pb-2">
+                        <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md w-fit">
+                            <Sigma className="w-3 h-3 mr-1" />
+                            Total
+                        </Badge>
+                        <p className="text-4xl font-bold">{totalSwalaths}</p>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-xs text-muted-foreground">Total swalaths for the selected period.</p>
+                    </CardContent>
+                </Card>
 
-          <div className="space-y-2">
-              {filteredEntries.slice().reverse().map(entry => (
-                  <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
-                      <div>
-                          <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
-                          <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <p className="font-bold text-lg">{entry.total}</p>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full">
-                                    <MoreHorizontal />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleEdit(entry)}>
-                                    <Pencil className="mr-2" /> Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
-                                    <Trash2 className="mr-2" /> Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                  </div>
-              ))}
-          </div>
+                {/* Statistics Section */}
+                <Card className="rounded-xl shadow-none border-none bg-card lg:col-span-2">
+                     <CardHeader className="pb-2">
+                        <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md w-fit">
+                            <BarChart className="w-3 h-3 mr-1" />
+                            Statistics
+                        </Badge>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center text-2xl font-bold">
+                                <Percent className="w-5 h-5 mr-2 text-primary" />
+                                {averageCompletion}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">Average completion rate.</p>
+                        </div>
+                        {chartData.length > 0 ? (
+                            <ChartContainer config={chartConfig} className="h-40 w-full">
+                                <RechartsBarChart data={chartData} margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
+                                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent indicator="dot" />}
+                                />
+                                <Bar 
+                                    dataKey="total"
+                                    radius={10} 
+                                    fill="hsl(var(--primary))"
+                                    barSize={range === 'year' ? 5 : (range === 'month' ? 10 : 20)}
+                                />
+                                </RechartsBarChart>
+                            </ChartContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-lg">
+                                <p className="text-muted-foreground">No chart data for this period.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Logs Section */}
+            <Card className="rounded-xl shadow-none border-none bg-card">
+                <CardHeader>
+                    <CardTitle className="text-lg">Logs</CardTitle>
+                    <CardDescription>Detailed entries for the selected period.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {filteredEntries.length > 0 ? (
+                        <div className="space-y-2">
+                            {filteredEntries.slice().reverse().map(entry => (
+                                <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
+                                    <div>
+                                        <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
+                                        <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <p className="font-bold text-lg">{entry.total}</p>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="rounded-full">
+                                                    <MoreHorizontal />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem onClick={() => handleEdit(entry)}>
+                                                    <Pencil className="mr-2" /> Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
+                                                    <Trash2 className="mr-2" /> Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                         <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
+                            <p className="text-muted-foreground">No entries for this period.</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </CardContent>
       </Card>
       
