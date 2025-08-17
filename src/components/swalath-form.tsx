@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { FC } from 'react';
@@ -60,17 +61,28 @@ const formFields: {
   { name: 'ishaFajr', label: 'Isha - Fajr', icon: Bed },
 ];
 
+const getInitialValues = (entry: SwalathEntry | null): FormData => {
+  return {
+    fajrDuhr: entry?.fajrDuhr ?? 0,
+    duhrAsr: entry?.duhrAsr ?? 0,
+    asrMaghrib: entry?.asrMaghrib ?? 0,
+    maghribIsha: entry?.maghribIsha ?? 0,
+    ishaFajr: entry?.ishaFajr ?? 0,
+    notes: entry?.notes ?? '',
+  };
+};
+
 export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) => {
   const { toast } = useToast();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: entry || formSchema.parse({}),
+    defaultValues: getInitialValues(entry),
   });
 
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    form.reset(entry || formSchema.parse({}));
+    form.reset(getInitialValues(entry));
   }, [entry, form]);
 
   const watchedValues = form.watch();
