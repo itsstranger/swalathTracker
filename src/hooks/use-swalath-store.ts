@@ -14,7 +14,6 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 
-
 const LOCAL_STORE_KEY = 'swalath-tracker-data';
 
 export function useSwalathStore() {
@@ -22,7 +21,7 @@ export function useSwalathStore() {
   const [entries, setEntries] = useState<SwalathEntry[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  
+
   // This effect handles the initial data loading and synchronization.
   useEffect(() => {
     // We must wait until the auth state is fully resolved before doing anything.
@@ -45,7 +44,7 @@ export function useSwalathStore() {
               const batch = writeBatch(firestore);
               localEntries.forEach((entry) => {
                 const docRef = doc(userEntriesCol, entry.id);
-                batch.set(docRef, entry, { merge: true });
+                batch.set(docRef, entry, { merge: true }); // Use merge to not overwrite newer data
               });
               await batch.commit();
               window.localStorage.removeItem(LOCAL_STORE_KEY);
@@ -99,6 +98,7 @@ export function useSwalathStore() {
         await setDoc(entryRef, newEntry, { merge: true });
       } catch (error) {
         console.error("Error saving entry to Firestore:", error);
+        // Here you might want to add a toast to inform the user about the error
       }
     } else {
       setEntries((prevEntries) => {
