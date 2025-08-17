@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -13,6 +14,7 @@ import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import type { SwalathEntry } from '@/lib/types';
 import { useState } from 'react';
+import { format } from 'date-fns';
 
 export const BottomNav = () => {
   const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId } = useSwalathStore();
@@ -41,6 +43,7 @@ export const BottomNav = () => {
     setIsSheetOpen(isOpen);
   }
 
+  const entryDate = selectedEntry?.id ? new Date(selectedEntry.id) : new Date();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-card/95 backdrop-blur-sm border-t">
@@ -61,13 +64,16 @@ export const BottomNav = () => {
                     <Plus />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col">
-              <SheetHeader>
+            <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
+              <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">
                   {selectedEntry?.id ? 'Edit Entry' : "Today's Entry"}
                 </SheetTitle>
+                <SheetDescription>
+                  {format(entryDate, "EEEE, MMMM d, yyyy")}
+                </SheetDescription>
               </SheetHeader>
-              <div className="flex-grow mt-4 overflow-hidden">
+              <div className="flex-grow overflow-y-auto px-6">
                 <SwalathForm
                   entry={selectedEntry}
                   onSave={handleSave}
