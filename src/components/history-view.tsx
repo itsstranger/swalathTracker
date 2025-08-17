@@ -1,9 +1,10 @@
+
 'use client';
 
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
 
 import {
   Card,
@@ -18,7 +19,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import type { SwalathEntry } from '@/lib/types';
 import {
@@ -41,9 +42,9 @@ import { Badge } from './ui/badge';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
@@ -69,27 +70,44 @@ const chartConfig = {
 
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
   const { addOrUpdateEntry } = useSwalathStore();
-  const [range, setRange] = useState<Range>('month');
+  const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
 
   const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(a.id).getTime() - new Date(b.id).getTime()), [entries]);
-  const latestEntries = useMemo(() => sortedEntries.slice(-7), [sortedEntries]);
+
+  const filteredEntries = useMemo(() => {
+    const now = new Date();
+    if (range === 'week') {
+      const last7Days = subDays(now, 6);
+      return sortedEntries.filter(entry => new Date(entry.id) >= last7Days);
+    }
+    if (range === 'month') {
+        const last30Days = subDays(now, 29);
+        return sortedEntries.filter(entry => new Date(entry.id) >= last30Days);
+    }
+    if (range === 'year') {
+        const last365Days = subDays(now, 364);
+        return sortedEntries.filter(entry => new Date(entry.id) >= last365Days);
+    }
+    return [];
+  }, [sortedEntries, range]);
+
   
-  const totalSwalaths = useMemo(() => latestEntries.reduce((acc, e) => acc + e.total, 0), [latestEntries]);
+  const totalSwalaths = useMemo(() => filteredEntries.reduce((acc, e) => acc + e.total, 0), [filteredEntries]);
   const averageCompletion = useMemo(() => {
-    if (latestEntries.length === 0) return 0;
-    const maxPossible = latestEntries.length * 1000; // Assuming a high number is "full completion"
+    if (filteredEntries.length === 0) return 0;
+    const maxPossible = filteredEntries.length * 1000; // Assuming a high number is "full completion"
     return maxPossible > 0 ? Math.round((totalSwalaths / maxPossible) * 100) : 0;
-  }, [totalSwalaths, latestEntries.length]);
+  }, [totalSwalaths, filteredEntries.length]);
 
 
   const chartData = useMemo(() => {
-    return latestEntries.map((entry) => ({
+    return filteredEntries.map((entry) => ({
       date: format(new Date(entry.id), 'dd MMM'),
       total: entry.total,
     }));
-  }, [latestEntries]);
+  }, [filteredEntries]);
 
   const handleDeleteConfirm = () => {
     if (deleteCandidate) {
@@ -107,9 +125,13 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     setEditingEntry(null);
   }
 
-  const dateRangeLabel = latestEntries.length > 0 ? `${format(new Date(latestEntries[0].id), 'd MMM')} - ${format(new Date(latestEntries[latestEntries.length - 1].id), 'd MMM yyyy')}` : '';
+  const dateRangeLabel = filteredEntries.length > 0 ? `${format(new Date(filteredEntries[0].id), 'd MMM')} - ${format(new Date(filteredEntries[filteredEntries.length - 1].id), 'd MMM yyyy')}` : 'No data for this period';
 
   const entryDate = editingEntry?.id ? new Date(editingEntry.id) : new Date();
+  
+  const handleRangeChange = (newRange: Range) => {
+    setRange(newRange);
+  };
 
   return (
     <>
@@ -117,9 +139,9 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <Button variant={range === 'week' ? 'outline' : 'ghost'} size="sm" onClick={() => setRange('week')} className="rounded-full">Week</Button>
-                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('month')} className="rounded-full">Month</Button>
-                <Button variant={range === 'year' ? 'outline' : 'ghost'} size="sm" onClick={() => setRange('year')} className="rounded-full">Year</Button>
+                <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
+                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
+                <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
             </div>
           </div>
         </CardHeader>
@@ -160,9 +182,9 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                 <div className="flex items-center justify-between">
                     <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
                         <BarChart className="w-3 h-3 mr-1" />
-                        Weekly Chart
+                        Activity Chart
                     </Badge>
-                    <span className="text-xs text-muted-foreground">{dateRangeLabel}</span>
+                    <span className="text-xs text-muted-foreground">{range.charAt(0).toUpperCase() + range.slice(1)}</span>
                 </div>
               </CardHeader>
               <CardContent>
@@ -177,12 +199,9 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                       <Bar 
                         dataKey="total"
                         radius={10} 
-                        barSize={20}
-                        >
-                        {chartData.map((entry, index) => (
-                          <YAxis key={`cell-${index}`} fill={index === 1 ? 'hsl(var(--primary))' : 'hsl(var(--chart-2))'} />
-                        ))}
-                      </Bar>
+                        fill="hsl(var(--primary))"
+                        barSize={range === 'year' ? 5 : (range === 'month' ? 10 : 20)}
+                      />
                     </RechartsBarChart>
                   </ChartContainer>
                 ) : (
@@ -194,7 +213,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
           </Card>
 
           <div className="space-y-2">
-              {latestEntries.slice().reverse().map(entry => (
+              {filteredEntries.slice().reverse().map(entry => (
                   <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
                       <div>
                           <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
