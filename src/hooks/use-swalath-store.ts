@@ -23,21 +23,21 @@ export function useSwalathStore() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   
-  // This effect will only run when the authentication state has been determined.
+  // This effect handles the initial data loading and synchronization.
   useEffect(() => {
-    // If auth is still loading, we do nothing to prevent race conditions.
+    // Do not run until authentication check is complete.
     if (authLoading) {
       return;
     }
 
     let unsubscribe: (() => void) | undefined;
 
-    // This function will run when a user is properly authenticated.
-    const setupFirestoreSync = (userId: string) => {
-      const userEntriesCol = collection(firestore, 'users', userId, 'entries');
+    if (user) {
+      // User is logged in, set up Firestore sync.
+      const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
       const localData = window.localStorage.getItem(LOCAL_STORE_KEY);
-      
-      // Sync local data to Firestore if it exists
+
+      // Sync local data to Firestore if it exists.
       if (localData) {
         try {
           const localEntries: SwalathEntry[] = JSON.parse(localData);
@@ -45,7 +45,7 @@ export function useSwalathStore() {
             const batch = writeBatch(firestore);
             localEntries.forEach((entry) => {
               const docRef = doc(userEntriesCol, entry.id);
-              batch.set(docRef, entry);
+              batch.set(docRef, entry, { merge: true });
             });
             batch.commit().then(() => {
                 window.localStorage.removeItem(LOCAL_STORE_KEY);
@@ -58,7 +58,7 @@ export function useSwalathStore() {
         }
       }
 
-      // Listen for real-time updates from Firestore
+      // Listen for real-time updates from Firestore.
       unsubscribe = onSnapshot(userEntriesCol, (snapshot) => {
         const firestoreEntries: SwalathEntry[] = [];
         snapshot.forEach((doc) => {
@@ -68,35 +68,28 @@ export function useSwalathStore() {
         setIsInitialized(true);
       }, (error) => {
         console.error("Error listening to Firestore:", error);
-        setIsInitialized(true); // Still initialized, even if there's an error.
+        setIsInitialized(true);
       });
-    };
-    
-    // This function runs when the user is logged out.
-    const loadLocalData = () => {
+
+    } else {
+      // User is logged out, load from local storage.
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
         setEntries(storedData ? JSON.parse(storedData) : []);
       } catch (error) {
-        console.error('Failed to load local data after logout', error);
+        console.error('Failed to load local data', error);
         setEntries([]);
       }
       setIsInitialized(true);
-    };
-
-    if (user) {
-      setupFirestoreSync(user.uid);
-    } else {
-      loadLocalData();
     }
   
-    // Cleanup function to unsubscribe from the Firestore listener on component unmount or user change
+    // Cleanup function to unsubscribe from the Firestore listener.
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [user, authLoading]); // This effect depends on the user and authLoading state.
+  }, [user, authLoading]);
 
 
   const addOrUpdateEntry = useCallback(async (newEntry: SwalathEntry) => {
