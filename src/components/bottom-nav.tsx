@@ -27,9 +27,20 @@ export const BottomNav = () => {
 
   const handleOpenForm = () => {
     const today = new Date().toISOString().split('T')[0];
-    setSelectedEntryId(today);
+    const existingEntry = useSwalathStore.getState().entries.find(e => e.id === today);
+    if (!existingEntry) {
+      setSelectedEntryId(today);
+    }
     setIsSheetOpen(true);
   }
+  
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setSelectedEntryId(null);
+    }
+    setIsSheetOpen(isOpen);
+  }
+
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-card/95 backdrop-blur-sm border-t">
@@ -44,19 +55,19 @@ export const BottomNav = () => {
             <span className="text-xs">Search</span>
           </Button>
 
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <Sheet open={isSheetOpen} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
                 <Button size="lg" className="rounded-full w-16 h-16 text-3xl shadow-lg" onClick={handleOpenForm}>
                     <Plus />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-2xl max-h-screen flex flex-col">
+            <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col">
               <SheetHeader>
                 <SheetTitle className="text-2xl font-bold">
                   {selectedEntry?.id ? 'Edit Entry' : "Today's Entry"}
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-4 flex-grow">
+              <div className="flex-grow mt-4 overflow-hidden">
                 <SwalathForm
                   entry={selectedEntry}
                   onSave={handleSave}

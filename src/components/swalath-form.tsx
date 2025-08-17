@@ -99,9 +99,9 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[80vh]">
-        <ScrollArea className="flex-grow p-1">
-          <div className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+        <ScrollArea className="flex-grow pr-4">
+          <div className="space-y-6 pb-4">
             <div className="grid grid-cols-1 gap-4">
               {formFields.map(({ name, label, icon: Icon }) => (
                 <FormField
@@ -161,7 +161,7 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
             </div>
           </div>
         </ScrollArea>
-        <div className="mt-6 flex flex-shrink-0 gap-4">
+        <div className="mt-auto pt-6 flex flex-shrink-0 gap-4">
             <Button type="button" variant="outline" className="w-full" onClick={onCancel}>
                 Cancel
             </Button>
