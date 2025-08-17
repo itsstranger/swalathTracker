@@ -41,9 +41,9 @@ import { Badge } from './ui/badge';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
@@ -108,6 +108,8 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
   }
 
   const dateRangeLabel = latestEntries.length > 0 ? `${format(new Date(latestEntries[0].id), 'd MMM')} - ${format(new Date(latestEntries[latestEntries.length - 1].id), 'd MMM yyyy')}` : '';
+
+  const entryDate = editingEntry?.id ? new Date(editingEntry.id) : new Date();
 
   return (
     <>
@@ -238,16 +240,19 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
       </AlertDialog>
 
       <Sheet open={!!editingEntry} onOpenChange={(open) => !open && setEditingEntry(null)}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-            <SheetHeader>
+        <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
+            <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">Edit Entry</SheetTitle>
+                <SheetDescription>
+                  {format(entryDate, "EEEE, MMMM d, yyyy")}
+                </SheetDescription>
             </SheetHeader>
-            <div className="mt-4">
-            <SwalathForm
-                entry={editingEntry}
-                onSave={handleSave}
-                onCancel={() => setEditingEntry(null)}
-            />
+            <div className="flex-grow overflow-y-auto px-6">
+              <SwalathForm
+                  entry={editingEntry}
+                  onSave={handleSave}
+                  onCancel={() => setEditingEntry(null)}
+              />
             </div>
         </SheetContent>
       </Sheet>
