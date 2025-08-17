@@ -7,11 +7,11 @@ import { getFirestore } from 'firebase/firestore';
 const firebaseConfig = {
   "projectId": "swalath-tracker-phkwt",
   "appId": "1:504782932765:web:50e736fc54cb682e0f2ff4",
-  "storageBucket": "swalath-tracker-phkwt.firebasestorage.app",
+  "storageBucket": "swalath-tracker-phkwt.appspot.com",
   "apiKey": "AIzaSyDfFodL8jPI9nlR1l2LCWz5D5lVZmBr8N4",
   "authDomain": "swalath-tracker-phkwt.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "504782932765"
+  "messagingSenderId": "504782932765",
+  "measurementId": "G-81Q1113B00"
 };
 
 // Initialize Firebase.
