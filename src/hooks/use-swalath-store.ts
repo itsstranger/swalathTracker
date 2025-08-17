@@ -38,73 +38,53 @@ export function useSwalathStore() {
 
   useEffect(() => {
     if (authLoading) {
-      // Don't do anything until Firebase Auth has initialized
       return;
     }
-
-    if (user) {
-      // User is logged in
-      const syncAndSubscribe = async () => {
-        // 1. Sync local data to Firestore if it exists
-        const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
-        if (storedData) {
+  
+    let unsubscribe: (() => void) | undefined;
+  
+    const initialize = async () => {
+      if (user) {
+        const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
+        const localData = window.localStorage.getItem(LOCAL_STORE_KEY);
+        
+        if (localData) {
           try {
-            const localEntries: SwalathEntry[] = JSON.parse(storedData);
+            const localEntries: SwalathEntry[] = JSON.parse(localData);
             if (localEntries.length > 0) {
-              const entriesColRef = collection(firestore, 'users', user.uid, 'entries');
               const batch = writeBatch(firestore);
-              
-              const querySnapshot = await getDocs(entriesColRef);
-              const firestoreEntries = new Map(querySnapshot.docs.map(d => [d.id, d.data() as SwalathEntry]));
-
-              localEntries.forEach((localEntry) => {
-                const firestoreEntry = firestoreEntries.get(localEntry.id);
-                // Only write if it doesn't exist or local is more recent (though we don't track timestamps, a simple overwrite is fine for this app)
-                if (!firestoreEntry) {
-                   const docRef = doc(entriesColRef, localEntry.id);
-                   batch.set(docRef, localEntry);
-                }
+              localEntries.forEach((entry) => {
+                const docRef = doc(userEntriesCol, entry.id);
+                batch.set(docRef, entry);
               });
-
               await batch.commit();
-              window.localStorage.removeItem(LOCAL_STORE_KEY); // Clear local after successful sync
             }
+            window.localStorage.removeItem(LOCAL_STORE_KEY);
           } catch (error) {
             console.error("Failed to sync local data to Firestore", error);
           }
         }
-        
-        // 2. Subscribe to Firestore for real-time updates
-        const entriesCol = collection(firestore, 'users', user.uid, 'entries');
-        const unsubscribe = onSnapshot(entriesCol, (snapshot) => {
+  
+        unsubscribe = onSnapshot(userEntriesCol, (snapshot) => {
           const firestoreEntries: SwalathEntry[] = [];
           snapshot.forEach((doc) => {
             firestoreEntries.push({ id: doc.id, ...doc.data() } as SwalathEntry);
           });
           setEntries(firestoreEntries);
-          setIsInitialized(true);
         }, (error) => {
           console.error("Error listening to Firestore:", error);
-          setIsInitialized(true); // Still initialized even if listener fails
         });
-
-        return unsubscribe;
-      };
-
-      const unsubscribePromise = syncAndSubscribe();
-      
-      return () => {
-        unsubscribePromise.then(unsubscribe => {
-          if (unsubscribe) {
-            unsubscribe();
-          }
-        });
-      };
-
-    } else {
-      // User is not logged in, use already loaded local storage data
+      }
       setIsInitialized(true);
-    }
+    };
+  
+    initialize();
+  
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [user, authLoading]);
 
 
