@@ -50,13 +50,13 @@ export const BottomNav = () => {
                     <Plus />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-2xl">
+            <SheetContent side="bottom" className="rounded-t-2xl max-h-screen flex flex-col">
               <SheetHeader>
                 <SheetTitle className="text-2xl font-bold">
                   {selectedEntry?.id ? 'Edit Entry' : "Today's Entry"}
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-4">
+              <div className="mt-4 flex-grow">
                 <SwalathForm
                   entry={selectedEntry}
                   onSave={handleSave}

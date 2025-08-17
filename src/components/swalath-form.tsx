@@ -30,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { SwalathEntry } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { ScrollArea } from './ui/scroll-area';
 
 const formSchema = z.object({
   fajrDuhr: z.number().min(0).default(0),
@@ -98,68 +99,69 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-        <div className="flex-grow space-y-6 overflow-y-auto p-1">
-          <div className="grid grid-cols-1 gap-4">
-            {formFields.map(({ name, label, icon: Icon }) => (
-              <FormField
-                key={name}
-                control={form.control}
-                name={name as keyof FormData}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2 text-muted-foreground">
-                      <Icon className="h-4 w-4" />
-                      <span>{label}</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                         type="number"
-                         min="0"
-                         className="text-lg"
-                         {...field}
-                         value={field.value || ''}
-                         onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full max-h-[80vh]">
+        <ScrollArea className="flex-grow p-1">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              {formFields.map(({ name, label, icon: Icon }) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name as keyof FormData}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-muted-foreground">
+                        <Icon className="h-4 w-4" />
+                        <span>{label}</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          className="text-lg"
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
 
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-muted-foreground">
-                  <NotebookText className="h-4 w-4" />
-                  Notes/Reflections
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Any thoughts or reflections for the day..."
-                    {...field}
-                    value={field.value || ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="flex items-center justify-between rounded-lg bg-muted p-4">
-              <div className="flex items-center gap-2 font-medium">
-                  <Sigma className="h-5 w-5 text-primary" />
-                  <span>Total</span>
-              </div>
-              <span className="text-2xl font-bold text-primary">{totalSwalaths}</span>
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-muted-foreground">
+                    <NotebookText className="h-4 w-4" />
+                    Notes/Reflections
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Any thoughts or reflections for the day..."
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex items-center justify-between rounded-lg bg-muted p-4">
+                <div className="flex items-center gap-2 font-medium">
+                    <Sigma className="h-5 w-5 text-primary" />
+                    <span>Total</span>
+                </div>
+                <span className="text-2xl font-bold text-primary">{totalSwalaths}</span>
+            </div>
           </div>
-
-        </div>
-        <div className="mt-6 flex gap-4">
+        </ScrollArea>
+        <div className="mt-6 flex flex-shrink-0 gap-4">
             <Button type="button" variant="outline" className="w-full" onClick={onCancel}>
                 Cancel
             </Button>
