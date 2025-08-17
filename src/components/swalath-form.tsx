@@ -14,7 +14,6 @@ import {
   Sun,
   Sunrise,
   Sunset,
-  X,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -27,14 +26,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription
-} from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import type { SwalathEntry } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -76,7 +67,6 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
     defaultValues: entry || formSchema.parse({}),
   });
 
-  const isEditing = !!entry;
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
@@ -105,99 +95,80 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
       description: `Your swalath count for ${format(new Date(entryId), 'MMM d, yyyy')} has been saved.`,
     });
   };
-  
-  const handleCancel = () => {
-    onCancel();
-    form.reset(formSchema.parse({}));
-  };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="font-headline">{isEditing ? 'Edit Entry' : "Today's Entry"}</CardTitle>
-            <CardDescription>
-              {isEditing ? `Editing entry for ${format(new Date(entry.id), 'MMM d, yyyy')}` : 'Record the number of swalaths performed today.'}
-            </CardDescription>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+        <div className="flex-grow space-y-6 overflow-y-auto p-1">
+          <div className="grid grid-cols-1 gap-4">
+            {formFields.map(({ name, label, icon: Icon }) => (
+              <FormField
+                key={name}
+                control={form.control}
+                name={name as keyof FormData}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-muted-foreground">
+                      <Icon className="h-4 w-4" />
+                      <span>{label}</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                         type="number"
+                         min="0"
+                         className="text-lg"
+                         {...field}
+                         value={field.value || ''}
+                         onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
           </div>
-          {isEditing && (
-            <Button variant="ghost" size="icon" onClick={handleCancel}>
-              <X />
-              <span className="sr-only">Cancel Edit</span>
-            </Button>
-          )}
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2 text-muted-foreground">
+                  <NotebookText className="h-4 w-4" />
+                  Notes/Reflections
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Any thoughts or reflections for the day..."
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="flex items-center justify-between rounded-lg bg-muted p-4">
+              <div className="flex items-center gap-2 font-medium">
+                  <Sigma className="h-5 w-5 text-primary" />
+                  <span>Total</span>
+              </div>
+              <span className="text-2xl font-bold text-primary">{totalSwalaths}</span>
+          </div>
+
         </div>
-      </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              {formFields.map(({ name, label, icon: Icon }) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name as keyof FormData}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Icon className="h-4 w-4 text-muted-foreground" />
-                        <span>{label}</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                           type="number"
-                           min="0"
-                           {...field}
-                           value={field.value || ''}
-                           onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <NotebookText className="h-4 w-4 text-muted-foreground" />
-                    Notes/Reflections
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any thoughts or reflections for the day..."
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex items-center justify-between rounded-lg border bg-muted p-4">
-                <div className="flex items-center gap-2 font-medium">
-                    <Sigma className="h-5 w-5 text-primary" />
-                    <span>Total</span>
-                </div>
-                <span className="text-2xl font-bold text-primary">{totalSwalaths}</span>
-            </div>
-
-          </CardContent>
-          <CardFooter>
+        <div className="mt-6 flex gap-4">
+            <Button type="button" variant="outline" className="w-full" onClick={onCancel}>
+                Cancel
+            </Button>
             <Button type="submit" className="w-full">
               <Save className="mr-2 h-4 w-4" />
-              {isEditing ? 'Update Entry' : "Save Today's Entry"}
+              Save
             </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+        </div>
+      </form>
+    </Form>
   );
 };

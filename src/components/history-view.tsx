@@ -2,8 +2,8 @@
 
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
-import { BarChart, CalendarDays, List, MoreVertical, Pencil, Trash2 } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { BarChart, MoreHorizontal, Pencil, Percent, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 import {
   Card,
@@ -18,18 +18,8 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, Tooltip } from 'recharts';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import type { SwalathEntry } from '@/lib/types';
 import {
   DropdownMenu,
@@ -47,6 +37,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from './ui/badge';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { SwalathForm } from './swalath-form';
+import { useSwalathStore } from '@/hooks/use-swalath-store';
 
 interface HistoryViewProps {
   entries: SwalathEntry[];
@@ -54,44 +54,42 @@ interface HistoryViewProps {
   onDelete: (id: string) => void;
 }
 
-type Range = '7d' | '30d' | 'all';
+type Range = 'week' | 'month' | 'year';
 
 const chartConfig = {
   total: {
     label: 'Total Swalaths',
+    color: 'hsl(var(--chart-2))',
+  },
+  active: {
+    label: 'Active Day',
     color: 'hsl(var(--primary))',
   },
 } satisfies ChartConfig;
 
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
-  const [range, setRange] = useState<Range>('30d');
+  const { addOrUpdateEntry } = useSwalathStore();
+  const [range, setRange] = useState<Range>('month');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
-  
-  const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(b.id).getTime() - new Date(a.id).getTime()), [entries]);
+  const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
 
-  const filteredEntries = useMemo(() => {
-    const now = new Date();
-    switch (range) {
-      case '7d':
-        const sevenDaysAgo = subDays(now, 7);
-        return sortedEntries.filter((e) => new Date(e.id) >= sevenDaysAgo);
-      case '30d':
-        const thirtyDaysAgo = subDays(now, 30);
-        return sortedEntries.filter((e) => new Date(e.id) >= thirtyDaysAgo);
-      case 'all':
-      default:
-        return sortedEntries;
-    }
-  }, [range, sortedEntries]);
+  const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(a.id).getTime() - new Date(b.id).getTime()), [entries]);
+  const latestEntries = useMemo(() => sortedEntries.slice(-7), [sortedEntries]);
+  
+  const totalSwalaths = useMemo(() => latestEntries.reduce((acc, e) => acc + e.total, 0), [latestEntries]);
+  const averageCompletion = useMemo(() => {
+    if (latestEntries.length === 0) return 0;
+    const maxPossible = latestEntries.length * 1000; // Assuming a high number is "full completion"
+    return maxPossible > 0 ? Math.round((totalSwalaths / maxPossible) * 100) : 0;
+  }, [totalSwalaths, latestEntries.length]);
+
 
   const chartData = useMemo(() => {
-    return filteredEntries
-      .map((entry) => ({
-        date: format(new Date(entry.id), 'MMM d'),
-        total: entry.total,
-      }))
-      .reverse(); // reverse for chronological order in chart
-  }, [filteredEntries]);
+    return latestEntries.map((entry) => ({
+      date: format(new Date(entry.id), 'dd MMM'),
+      total: entry.total,
+    }));
+  }, [latestEntries]);
 
   const handleDeleteConfirm = () => {
     if (deleteCandidate) {
@@ -99,112 +97,99 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
       setDeleteCandidate(null);
     }
   };
+  
+  const handleEdit = (entry: SwalathEntry) => {
+    setEditingEntry(entry);
+  };
+  
+  const handleSave = (entry: SwalathEntry) => {
+    addOrUpdateEntry(entry);
+    setEditingEntry(null);
+  }
 
   return (
     <>
-      <Card>
+      <Card className="rounded-2xl border shadow-sm">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <CardTitle className="flex items-center gap-2 font-headline">
-                <CalendarDays />
-                History
-              </CardTitle>
-              <CardDescription>
-                Your swalath history at a glance.
-              </CardDescription>
-            </div>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Button variant={range === '7d' ? 'default' : 'outline'} size="sm" onClick={() => setRange('7d')}>7 Days</Button>
-              <Button variant={range === '30d' ? 'default' : 'outline'} size="sm" onClick={() => setRange('30d')}>30 Days</Button>
-              <Button variant={range === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setRange('all')}>All Time</Button>
+                <Button variant={range === 'week' ? 'outline' : 'ghost'} size="sm" onClick={() => setRange('week')} className="rounded-full">Week</Button>
+                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('month')} className="rounded-full">Month</Button>
+                <Button variant={range === 'year' ? 'outline' : 'ghost'} size="sm" onClick={() => setRange('year')} className="rounded-full">Year</Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-8">
-          <div>
-              <h3 className="text-lg font-medium flex items-center gap-2 mb-4">
-                  <BarChart className="w-5 h-5" />
-                  Daily Totals
-              </h3>
-              {chartData.length > 0 ? (
-                  <ChartContainer config={chartConfig} className="h-64 w-full">
-                      <RechartsBarChart data={chartData} margin={{ top: 20, right: 20, bottom: 5, left: 0 }}>
-                          <CartesianGrid vertical={false} />
-                          <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                          <YAxis />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="total" fill="var(--color-total)" radius={4} />
-                      </RechartsBarChart>
+        <CardContent className="space-y-6">
+          <Card className="rounded-xl shadow-none border-none bg-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
+                        <Percent className="w-3 h-3 mr-1" />
+                        Average Completion
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{latestEntries.length > 0 ? `${format(new Date(latestEntries[0].id), 'd MMM')} - ${format(new Date(latestEntries[latestEntries.length - 1].id), 'd MMM yyyy')}` : ''}</span>
+                </div>
+                <p className="text-4xl font-bold">{averageCompletion}%</p>
+              </CardHeader>
+              <CardContent>
+                {chartData.length > 0 ? (
+                  <ChartContainer config={chartConfig} className="h-40 w-full">
+                    <RechartsBarChart data={chartData} margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
+                      <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent indicator="dot" />}
+                      />
+                      <Bar 
+                        dataKey="total"
+                        radius={10} 
+                        barSize={20}
+                        >
+                        {chartData.map((entry, index) => (
+                          <YAxis key={`cell-${index}`} fill={index === 1 ? 'hsl(var(--primary))' : 'hsl(var(--chart-2))'} />
+                        ))}
+                      </Bar>
+                    </RechartsBarChart>
                   </ChartContainer>
-              ) : (
-                  <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
-                      <p className="text-muted-foreground">No data for this period.</p>
+                ) : (
+                  <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-lg">
+                    <p className="text-muted-foreground">No data for this period.</p>
                   </div>
-              )}
-          </div>
-          <div>
-              <h3 className="text-lg font-medium flex items-center gap-2 mb-4">
-                  <List className="w-5 h-5" />
-                  Detailed Log
-              </h3>
-              <ScrollArea className="h-96 w-full">
-                  <Table>
-                      <TableHeader>
-                          <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead className="text-center">F-D</TableHead>
-                          <TableHead className="text-center">D-A</TableHead>
-                          <TableHead className="text-center">A-M</TableHead>
-                          <TableHead className="text-center">M-I</TableHead>
-                          <TableHead className="text-center">I-F</TableHead>
-                          <TableHead className="text-center">Total</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                          {filteredEntries.length > 0 ? (
-                              filteredEntries.map((entry) => (
-                              <TableRow key={entry.id}>
-                                  <TableCell className="font-medium">{format(new Date(entry.id), 'EEE, MMM d')}</TableCell>
-                                  <TableCell className="text-center">{entry.fajrDuhr}</TableCell>
-                                  <TableCell className="text-center">{entry.duhrAsr}</TableCell>
-                                  <TableCell className="text-center">{entry.asrMaghrib}</TableCell>
-                                  <TableCell className="text-center">{entry.maghribIsha}</TableCell>
-                                  <TableCell className="text-center">{entry.ishaFajr}</TableCell>
-                                  <TableCell className="text-center">
-                                      <Badge variant="default">{entry.total}</Badge>
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                      <DropdownMenu>
-                                          <DropdownMenuTrigger asChild>
-                                              <Button variant="ghost" size="icon">
-                                                  <MoreVertical />
-                                              </Button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent>
-                                              <DropdownMenuItem onClick={() => onEdit(entry)}>
-                                                  <Pencil className="mr-2" /> Edit
-                                              </DropdownMenuItem>
-                                              <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
-                                                  <Trash2 className="mr-2" /> Delete
-                                              </DropdownMenuItem>
-                                          </DropdownMenuContent>
-                                      </DropdownMenu>
-                                  </TableCell>
-                              </TableRow>
-                              ))
-                          ) : (
-                              <TableRow>
-                                  <TableCell colSpan={8} className="text-center h-24">No entries yet.</TableCell>
-                              </TableRow>
-                          )}
-                      </TableBody>
-                  </Table>
-              </ScrollArea>
+                )}
+              </CardContent>
+          </Card>
+
+          <div className="space-y-2">
+              {latestEntries.slice().reverse().map(entry => (
+                  <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
+                      <div>
+                          <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
+                          <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <p className="font-bold text-lg">{entry.total}</p>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full">
+                                    <MoreHorizontal />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleEdit(entry)}>
+                                    <Pencil className="mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
+                                    <Trash2 className="mr-2" /> Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                  </div>
+              ))}
           </div>
         </CardContent>
       </Card>
+      
       <AlertDialog open={!!deleteCandidate} onOpenChange={(open) => !open && setDeleteCandidate(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -219,6 +204,21 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Sheet open={!!editingEntry} onOpenChange={(open) => !open && setEditingEntry(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+            <SheetHeader>
+                <SheetTitle className="text-2xl font-bold">Edit Entry</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4">
+            <SwalathForm
+                entry={editingEntry}
+                onSave={handleSave}
+                onCancel={() => setEditingEntry(null)}
+            />
+            </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

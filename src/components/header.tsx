@@ -1,18 +1,17 @@
-import { MoonStar } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import type { FC } from 'react';
+import { Button } from '@/components/ui/button';
 
 export const Header: FC = () => {
   return (
-    <header className="text-center">
-      <div className="inline-flex items-center gap-3">
-        <MoonStar className="h-8 w-8 text-primary" />
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary">
-          Swalath Tracker
-        </h1>
-      </div>
-      <p className="mt-2 text-lg text-muted-foreground">
-        A simple way to track your daily prayers and reflections.
-      </p>
+    <header className="flex justify-between items-center">
+      <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
+        Statistics
+      </h1>
+      <Button variant="ghost" size="icon" className="rounded-full">
+        <Bell className="h-6 w-6" />
+        <span className="sr-only">Notifications</span>
+      </Button>
     </header>
   );
 };
