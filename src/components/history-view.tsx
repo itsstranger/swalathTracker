@@ -144,7 +144,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Total Count Section */}
             <Card className="rounded-xl shadow-sm lg:col-span-1">
                 <CardHeader className="pb-2">
@@ -160,7 +160,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             </Card>
 
             {/* Statistics Section */}
-            <Card className="rounded-xl shadow-sm lg:col-span-2">
+            <Card className="rounded-xl shadow-sm lg:col-span-3">
                  <CardHeader className="pb-2">
                     <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
                         <BarChart className="w-4 h-4" />
