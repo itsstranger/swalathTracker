@@ -19,46 +19,62 @@ import { firestore } from '@/lib/firebase';
 const LOCAL_STORE_KEY = 'swalath-tracker-data';
 
 export function useSwalathStore() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [entries, setEntries] = useState<SwalathEntry[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
+  
+  // Load local data on mount regardless of auth state
+  useEffect(() => {
+    try {
+      const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
+      if (storedData) {
+        setEntries(JSON.parse(storedData));
+      }
+    } catch (error) {
+      console.error('Failed to load initial data from localStorage', error);
+    }
+  }, []);
 
   useEffect(() => {
-    const initialize = async () => {
-      if (user) {
-        setIsSyncing(true);
-        // 1. Sync local data to Firestore first
-        try {
-          const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
-          if (storedData) {
+    if (authLoading) {
+      // Don't do anything until Firebase Auth has initialized
+      return;
+    }
+
+    if (user) {
+      // User is logged in
+      const syncAndSubscribe = async () => {
+        // 1. Sync local data to Firestore if it exists
+        const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
+        if (storedData) {
+          try {
             const localEntries: SwalathEntry[] = JSON.parse(storedData);
             if (localEntries.length > 0) {
               const entriesColRef = collection(firestore, 'users', user.uid, 'entries');
               const batch = writeBatch(firestore);
               
               const querySnapshot = await getDocs(entriesColRef);
-              const firestoreEntryIds = new Set(querySnapshot.docs.map(d => d.id));
+              const firestoreEntries = new Map(querySnapshot.docs.map(d => [d.id, d.data() as SwalathEntry]));
 
-              localEntries.forEach((entry) => {
-                if (!firestoreEntryIds.has(entry.id)) {
-                  const docRef = doc(entriesColRef, entry.id);
-                  batch.set(docRef, entry);
+              localEntries.forEach((localEntry) => {
+                const firestoreEntry = firestoreEntries.get(localEntry.id);
+                // Only write if it doesn't exist or local is more recent (though we don't track timestamps, a simple overwrite is fine for this app)
+                if (!firestoreEntry) {
+                   const docRef = doc(entriesColRef, localEntry.id);
+                   batch.set(docRef, localEntry);
                 }
               });
 
               await batch.commit();
-              window.localStorage.removeItem(LOCAL_STORE_KEY);
+              window.localStorage.removeItem(LOCAL_STORE_KEY); // Clear local after successful sync
             }
+          } catch (error) {
+            console.error("Failed to sync local data to Firestore", error);
           }
-        } catch (error) {
-          console.error("Failed to sync local data to Firestore", error);
-        } finally {
-          setIsSyncing(false);
         }
-
-        // 2. Now, subscribe to Firestore for real-time updates
+        
+        // 2. Subscribe to Firestore for real-time updates
         const entriesCol = collection(firestore, 'users', user.uid, 'entries');
         const unsubscribe = onSnapshot(entriesCol, (snapshot) => {
           const firestoreEntries: SwalathEntry[] = [];
@@ -67,33 +83,33 @@ export function useSwalathStore() {
           });
           setEntries(firestoreEntries);
           setIsInitialized(true);
+        }, (error) => {
+          console.error("Error listening to Firestore:", error);
+          setIsInitialized(true); // Still initialized even if listener fails
         });
-        return () => unsubscribe();
 
-      } else {
-        // User is not logged in, use localStorage
-        try {
-          const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
-          if (storedData) {
-            setEntries(JSON.parse(storedData));
-          } else {
-            setEntries([]);
+        return unsubscribe;
+      };
+
+      const unsubscribePromise = syncAndSubscribe();
+      
+      return () => {
+        unsubscribePromise.then(unsubscribe => {
+          if (unsubscribe) {
+            unsubscribe();
           }
-        } catch (error) {
-          console.error('Failed to load data from localStorage', error);
-        } finally {
-          setIsInitialized(true);
-        }
-      }
-    };
+        });
+      };
 
-    initialize();
-  }, [user]);
+    } else {
+      // User is not logged in, use already loaded local storage data
+      setIsInitialized(true);
+    }
+  }, [user, authLoading]);
 
 
   const addOrUpdateEntry = useCallback(async (newEntry: SwalathEntry) => {
     if (user) {
-      // Firestore logic
       try {
         const entryRef = doc(firestore, 'users', user.uid, 'entries', newEntry.id);
         await setDoc(entryRef, newEntry, { merge: true });
@@ -101,7 +117,6 @@ export function useSwalathStore() {
         console.error("Error saving entry to Firestore:", error);
       }
     } else {
-      // LocalStorage logic
       setEntries((prevEntries) => {
         const entryIndex = prevEntries.findIndex((e) => e.id === newEntry.id);
         let updatedEntries;
@@ -123,7 +138,6 @@ export function useSwalathStore() {
 
   const deleteEntry = useCallback(async (id: string) => {
     if (user) {
-        // Firestore logic
         try {
             const entryRef = doc(firestore, 'users', user.uid, 'entries', id);
             await deleteDoc(entryRef);
@@ -131,7 +145,6 @@ export function useSwalathStore() {
             console.error("Error deleting entry from Firestore:", error);
         }
     } else {
-        // LocalStorage logic
         setEntries((prevEntries) => {
             const updatedEntries = prevEntries.filter((e) => e.id !== id);
             try {
@@ -162,6 +175,6 @@ export function useSwalathStore() {
     selectedEntryId, 
     setSelectedEntryId,
     getSelectedEntry,
-    isInitialized: isInitialized && !isSyncing,
+    isInitialized,
   };
 }
