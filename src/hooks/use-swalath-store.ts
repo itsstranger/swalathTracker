@@ -23,7 +23,7 @@ export function useSwalathStore() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   
-  // Load local data on mount regardless of auth state
+  // Load local data on initial mount
   useEffect(() => {
     try {
       const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
@@ -36,6 +36,7 @@ export function useSwalathStore() {
   }, []);
 
   useEffect(() => {
+    // Prevent any Firestore operations until authentication is resolved
     if (authLoading) {
       return;
     }
@@ -43,6 +44,7 @@ export function useSwalathStore() {
     let unsubscribe: (() => void) | undefined;
   
     const initialize = async () => {
+      // If user is logged in, sync local data to Firestore and set up listener
       if (user) {
         const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
         const localData = window.localStorage.getItem(LOCAL_STORE_KEY);
@@ -74,26 +76,21 @@ export function useSwalathStore() {
           console.error("Error listening to Firestore:", error);
         });
       } else {
-        // Not logged in, ensure we are not subscribed to anything
-        if (unsubscribe) unsubscribe();
-        // Reload from local storage in case of logout
+        // If user is logged out, load from local storage
         try {
             const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
-            if (storedData) {
-              setEntries(JSON.parse(storedData));
-            } else {
-              setEntries([]);
-            }
-          } catch (error) {
+            setEntries(storedData ? JSON.parse(storedData) : []);
+        } catch (error) {
             console.error('Failed to load local data after logout', error);
             setEntries([]);
-          }
+        }
       }
       setIsInitialized(true);
     };
   
     initialize();
   
+    // Cleanup function to unsubscribe from the Firestore listener
     return () => {
       if (unsubscribe) {
         unsubscribe();
