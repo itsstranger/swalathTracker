@@ -134,51 +134,49 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
   return (
     <>
-      <Card className="rounded-2xl border shadow-sm">
-        <CardHeader>
-            <div className="flex items-center justify-between">
-                <CardTitle>History & Stats</CardTitle>
-                <div className="flex items-center gap-2">
-                    <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
-                    <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
-                    <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
-                </div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">History & Stats</h2>
+            <div className="flex items-center gap-2">
+                <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
+                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
+                <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
             </div>
-            <CardDescription>{dateRangeLabel}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Total Count Section */}
-                <Card className="rounded-xl shadow-none border-none bg-card lg:col-span-1">
-                    <CardHeader className="pb-2">
-                        <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md w-fit">
-                            <Sigma className="w-3 h-3 mr-1" />
-                            Total
-                        </Badge>
-                        <p className="text-4xl font-bold">{totalSwalaths}</p>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-xs text-muted-foreground">Total swalaths for the selected period.</p>
-                    </CardContent>
-                </Card>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Total Count Section */}
+            <Card className="rounded-xl shadow-sm lg:col-span-1">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
+                        <Sigma className="w-4 h-4" />
+                        Total
+                    </CardTitle>
+                    <p className="text-4xl font-bold">{totalSwalaths}</p>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-xs text-muted-foreground">Total swalaths for {dateRangeLabel}.</p>
+                </CardContent>
+            </Card>
 
-                {/* Statistics Section */}
-                <Card className="rounded-xl shadow-none border-none bg-card lg:col-span-2">
-                     <CardHeader className="pb-2">
-                        <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md w-fit">
-                            <BarChart className="w-3 h-3 mr-1" />
-                            Statistics
-                        </Badge>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center text-2xl font-bold">
-                                <Percent className="w-5 h-5 mr-2 text-primary" />
-                                {averageCompletion}%
+            {/* Statistics Section */}
+            <Card className="rounded-xl shadow-sm lg:col-span-2">
+                 <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
+                        <BarChart className="w-4 h-4" />
+                        Statistics
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {chartData.length > 0 ? (
+                        <>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center text-2xl font-bold">
+                                    <Percent className="w-5 h-5 mr-2 text-primary" />
+                                    {averageCompletion}%
+                                </div>
+                                <p className="text-xs text-muted-foreground">Average completion rate.</p>
                             </div>
-                            <p className="text-xs text-muted-foreground">Average completion rate.</p>
-                        </div>
-                        {chartData.length > 0 ? (
                             <ChartContainer config={chartConfig} className="h-40 w-full">
                                 <RechartsBarChart data={chartData} margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
                                 <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
@@ -194,60 +192,60 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                                 />
                                 </RechartsBarChart>
                             </ChartContainer>
-                        ) : (
-                            <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-lg">
-                                <p className="text-muted-foreground">No chart data for this period.</p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Logs Section */}
-            <Card className="rounded-xl shadow-none border-none bg-card">
-                <CardHeader>
-                    <CardTitle className="text-lg">Logs</CardTitle>
-                    <CardDescription>Detailed entries for the selected period.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {filteredEntries.length > 0 ? (
-                        <div className="space-y-2">
-                            {filteredEntries.slice().reverse().map(entry => (
-                                <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
-                                    <div>
-                                        <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
-                                        <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <p className="font-bold text-lg">{entry.total}</p>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="rounded-full">
-                                                    <MoreHorizontal />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuItem onClick={() => handleEdit(entry)}>
-                                                    <Pencil className="mr-2" /> Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
-                                                    <Trash2 className="mr-2" /> Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        </>
                     ) : (
-                         <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
-                            <p className="text-muted-foreground">No entries for this period.</p>
+                        <div className="flex items-center justify-center h-[178px] border-2 border-dashed rounded-lg">
+                            <p className="text-muted-foreground">No chart data for this period.</p>
                         </div>
                     )}
                 </CardContent>
             </Card>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Logs Section */}
+        <Card className="rounded-xl shadow-sm">
+            <CardHeader>
+                <CardTitle className="text-lg">Logs</CardTitle>
+                <CardDescription>Detailed entries for the selected period.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {filteredEntries.length > 0 ? (
+                    <div className="space-y-2">
+                        {filteredEntries.slice().reverse().map(entry => (
+                            <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
+                                <div>
+                                    <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
+                                    <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <p className="font-bold text-lg">{entry.total}</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="rounded-full">
+                                                <MoreHorizontal />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => handleEdit(entry)}>
+                                                <Pencil className="mr-2" /> Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
+                                                <Trash2 className="mr-2" /> Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                     <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
+                        <p className="text-muted-foreground">No entries for this period.</p>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+      </div>
       
       <AlertDialog open={!!deleteCandidate} onOpenChange={(open) => !open && setDeleteCandidate(null)}>
         <AlertDialogContent>
