@@ -1,3 +1,4 @@
+
 'use client';
 
 import { BarChart3, Calendar, Plus, Search, Settings } from 'lucide-react';
@@ -13,14 +14,19 @@ import {
 import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import type { SwalathEntry } from '@/lib/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 
 export const BottomNav = () => {
-  const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId } = useSwalathStore();
+  const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries } = useSwalathStore();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const selectedEntry = getSelectedEntry();
   
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
     setSelectedEntryId(null);
@@ -28,10 +34,12 @@ export const BottomNav = () => {
   }
 
   const handleOpenForm = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const existingEntry = useSwalathStore.getState().entries.find(e => e.id === today);
-    if (!existingEntry) {
-      setSelectedEntryId(today);
+    if (!selectedEntry) {
+      const today = new Date().toISOString().split('T')[0];
+      const existingEntry = entries.find(e => e.id === today);
+      if (!existingEntry) {
+        setSelectedEntryId(today);
+      }
     }
     setIsSheetOpen(true);
   }
@@ -41,6 +49,10 @@ export const BottomNav = () => {
       setSelectedEntryId(null);
     }
     setIsSheetOpen(isOpen);
+  }
+
+  if (!isClient) {
+    return null; 
   }
 
   const entryDate = selectedEntry?.id ? new Date(selectedEntry.id) : new Date();
