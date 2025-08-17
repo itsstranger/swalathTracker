@@ -14,6 +14,7 @@ import {
   Sun,
   Sunrise,
   Sunset,
+  X,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -29,14 +30,15 @@ import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import type { SwalathEntry } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
   fajrDuhr: z.number().min(0).default(0),
@@ -52,6 +54,7 @@ type FormData = z.infer<typeof formSchema>;
 interface SwalathFormProps {
   entry: SwalathEntry | null;
   onSave: (entry: SwalathEntry) => void;
+  onCancel: () => void;
 }
 
 const formFields: {
@@ -66,12 +69,15 @@ const formFields: {
   { name: 'ishaFajr', label: 'Isha - Fajr', icon: Bed },
 ];
 
-export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave }) => {
+export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) => {
   const { toast } = useToast();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: entry || formSchema.parse({}),
   });
+
+  const isEditing = !!entry;
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     form.reset(entry || formSchema.parse({}));
@@ -79,33 +85,49 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave }) => {
 
   const watchedValues = form.watch();
   const totalSwalaths = useMemo(() => {
-    return Object.values(watchedValues).reduce(
+    const { notes, ...counts } = watchedValues;
+    return Object.values(counts).reduce(
       (acc, val) => (typeof val === 'number' ? acc + val : acc),
       0
     );
   }, [watchedValues]);
 
   const onSubmit = (values: FormData) => {
-    const today = new Date().toISOString().split('T')[0];
+    const entryId = entry?.id || today;
     const newEntry: SwalathEntry = {
-      id: today,
+      id: entryId,
       ...values,
       total: totalSwalaths,
     };
     onSave(newEntry);
     toast({
       title: 'Entry Saved',
-      description: `Your swalath count for today has been saved.`,
+      description: `Your swalath count for ${format(new Date(entryId), 'MMM d, yyyy')} has been saved.`,
     });
+  };
+  
+  const handleCancel = () => {
+    onCancel();
+    form.reset(formSchema.parse({}));
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Today's Entry</CardTitle>
-        <CardDescription>
-          Record the number of swalaths performed today.
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="font-headline">{isEditing ? 'Edit Entry' : "Today's Entry"}</CardTitle>
+            <CardDescription>
+              {isEditing ? `Editing entry for ${format(new Date(entry.id), 'MMM d, yyyy')}` : 'Record the number of swalaths performed today.'}
+            </CardDescription>
+          </div>
+          {isEditing && (
+            <Button variant="ghost" size="icon" onClick={handleCancel}>
+              <X />
+              <span className="sr-only">Cancel Edit</span>
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -151,6 +173,7 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave }) => {
                     <Textarea
                       placeholder="Any thoughts or reflections for the day..."
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -161,7 +184,7 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave }) => {
             <div className="flex items-center justify-between rounded-lg border bg-muted p-4">
                 <div className="flex items-center gap-2 font-medium">
                     <Sigma className="h-5 w-5 text-primary" />
-                    <span>Total Today</span>
+                    <span>Total</span>
                 </div>
                 <span className="text-2xl font-bold text-primary">{totalSwalaths}</span>
             </div>
@@ -170,7 +193,7 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave }) => {
           <CardFooter>
             <Button type="submit" className="w-full">
               <Save className="mr-2 h-4 w-4" />
-              Save Today's Entry
+              {isEditing ? 'Update Entry' : "Save Today's Entry"}
             </Button>
           </CardFooter>
         </form>

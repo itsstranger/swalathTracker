@@ -8,6 +8,7 @@ const STORE_KEY = 'swalath-tracker-data';
 export function useSwalathStore() {
   const [entries, setEntries] = useState<SwalathEntry[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -45,5 +46,26 @@ export function useSwalathStore() {
     });
   }, []);
 
-  return { entries, addOrUpdateEntry };
+  const deleteEntry = useCallback((id: string) => {
+    setEntries((prevEntries) => prevEntries.filter((e) => e.id !== id));
+    if (selectedEntryId === id) {
+      setSelectedEntryId(null);
+    }
+  }, [selectedEntryId]);
+  
+  const getSelectedEntry = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const entryIdToFind = selectedEntryId || today;
+    return entries.find((e) => e.id === entryIdToFind) || null;
+  }, [entries, selectedEntryId]);
+
+
+  return { 
+    entries, 
+    addOrUpdateEntry, 
+    deleteEntry, 
+    selectedEntryId, 
+    setSelectedEntryId,
+    getSelectedEntry,
+  };
 }

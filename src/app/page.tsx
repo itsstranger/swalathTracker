@@ -1,16 +1,33 @@
 'use client';
 
+import { useState } from 'react';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import { Header } from '@/components/header';
 import { SwalathForm } from '@/components/swalath-form';
 import { DailyInsight } from '@/components/daily-insight';
 import { HistoryView } from '@/components/history-view';
+import type { SwalathEntry } from '@/lib/types';
 
 export default function Home() {
-  const { entries, addOrUpdateEntry } = useSwalathStore();
+  const { entries, addOrUpdateEntry, deleteEntry, setSelectedEntryId, getSelectedEntry } = useSwalathStore();
 
-  const today = new Date().toISOString().split('T')[0];
-  const todaysEntry = entries.find((e) => e.id === today) || null;
+  const selectedEntry = getSelectedEntry();
+  
+  const handleEdit = (entry: SwalathEntry) => {
+    setSelectedEntryId(entry.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
+  const handleDelete = (id: string) => {
+    deleteEntry(id);
+  };
+  
+  const handleSave = (entry: SwalathEntry) => {
+    addOrUpdateEntry(entry);
+    if(selectedEntry?.id === entry.id) {
+      setSelectedEntryId(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground font-body">
@@ -18,11 +35,11 @@ export default function Home() {
         <Header />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
           <div className="lg:col-span-1 flex flex-col gap-8">
-            <SwalathForm entry={todaysEntry} onSave={addOrUpdateEntry} />
-            <DailyInsight entry={todaysEntry} />
+            <SwalathForm entry={selectedEntry} onSave={handleSave} onCancel={() => setSelectedEntryId(null)} />
+            <DailyInsight entry={selectedEntry} />
           </div>
           <div className="lg:col-span-2">
-            <HistoryView entries={entries} />
+            <HistoryView entries={entries} onEdit={handleEdit} onDelete={handleDelete} />
           </div>
         </div>
       </div>
