@@ -33,62 +33,59 @@ export function useSwalathStore() {
     } catch (error) {
       console.error('Failed to load initial data from localStorage', error);
     }
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
-    // Prevent any Firestore operations until authentication is resolved
+    // Do nothing until Firebase auth is resolved
     if (authLoading) {
       return;
     }
-  
+
     let unsubscribe: (() => void) | undefined;
-  
-    const initialize = async () => {
-      // If user is logged in, sync local data to Firestore and set up listener
-      if (user) {
-        const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
-        const localData = window.localStorage.getItem(LOCAL_STORE_KEY);
-        
-        if (localData) {
-          try {
-            const localEntries: SwalathEntry[] = JSON.parse(localData);
-            if (localEntries.length > 0) {
-              const batch = writeBatch(firestore);
-              localEntries.forEach((entry) => {
-                const docRef = doc(userEntriesCol, entry.id);
-                batch.set(docRef, entry);
-              });
-              await batch.commit();
-            }
-            window.localStorage.removeItem(LOCAL_STORE_KEY);
-          } catch (error) {
-            console.error("Failed to sync local data to Firestore", error);
-          }
-        }
-  
-        unsubscribe = onSnapshot(userEntriesCol, (snapshot) => {
-          const firestoreEntries: SwalathEntry[] = [];
-          snapshot.forEach((doc) => {
-            firestoreEntries.push({ id: doc.id, ...doc.data() } as SwalathEntry);
-          });
-          setEntries(firestoreEntries);
-        }, (error) => {
-          console.error("Error listening to Firestore:", error);
-        });
-      } else {
-        // If user is logged out, load from local storage
+
+    // User is logged in, sync data and listen to firestore
+    if (user) {
+      const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
+      const localData = window.localStorage.getItem(LOCAL_STORE_KEY);
+      
+      if (localData) {
         try {
-            const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
-            setEntries(storedData ? JSON.parse(storedData) : []);
+          const localEntries: SwalathEntry[] = JSON.parse(localData);
+          if (localEntries.length > 0) {
+            const batch = writeBatch(firestore);
+            localEntries.forEach((entry) => {
+              const docRef = doc(userEntriesCol, entry.id);
+              batch.set(docRef, entry);
+            });
+            batch.commit().then(() => {
+                window.localStorage.removeItem(LOCAL_STORE_KEY);
+            });
+          }
         } catch (error) {
-            console.error('Failed to load local data after logout', error);
-            setEntries([]);
+          console.error("Failed to sync local data to Firestore", error);
         }
       }
-      setIsInitialized(true);
-    };
-  
-    initialize();
+
+      unsubscribe = onSnapshot(userEntriesCol, (snapshot) => {
+        const firestoreEntries: SwalathEntry[] = [];
+        snapshot.forEach((doc) => {
+          firestoreEntries.push({ id: doc.id, ...doc.data() } as SwalathEntry);
+        });
+        setEntries(firestoreEntries);
+      }, (error) => {
+        console.error("Error listening to Firestore:", error);
+      });
+
+    } else { // User is logged out, use local storage
+      try {
+          const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
+          setEntries(storedData ? JSON.parse(storedData) : []);
+      } catch (error) {
+          console.error('Failed to load local data after logout', error);
+          setEntries([]);
+      }
+    }
   
     // Cleanup function to unsubscribe from the Firestore listener
     return () => {
