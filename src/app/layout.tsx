@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { BottomNav } from '@/components/bottom-nav';
+import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'Swalath Tracker',
@@ -21,11 +22,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=PT+Sans:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <div className="pb-20">
-          {children}
-        </div>
-        <BottomNav />
-        <Toaster />
+        <AuthProvider>
+          <div className="pb-20">
+            {children}
+          </div>
+          <BottomNav />
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
