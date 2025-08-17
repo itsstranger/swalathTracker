@@ -49,14 +49,19 @@ export const HadithBanner: FC = () => {
         )}
         {data && (
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-3">
                 <BookOpenText className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold text-primary font-headline">Hadith of the Day</h2>
             </div>
-            <blockquote className="border-l-4 border-primary pl-4 italic">
-              <p className="text-foreground/90">"{data.hadith}"</p>
-            </blockquote>
-            <p className="mt-2 text-right text-sm text-muted-foreground font-medium">
+            <div className="space-y-4">
+              <blockquote className="border-r-4 border-primary pr-4 text-right" lang="ar" dir="rtl">
+                <p className="text-lg text-foreground/90 font-arabic">{data.arabicText}</p>
+              </blockquote>
+              <blockquote className="border-l-4 border-primary pl-4 italic">
+                <p className="text-foreground/90">"{data.englishTranslation}"</p>
+              </blockquote>
+            </div>
+            <p className="mt-3 text-right text-sm text-muted-foreground font-medium">
               - {data.source}
             </p>
           </div>

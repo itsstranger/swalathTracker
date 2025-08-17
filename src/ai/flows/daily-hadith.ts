@@ -11,7 +11,8 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const DailyHadithOutputSchema = z.object({
-  hadith: z.string().describe('The text of the Hadith.'),
+  englishTranslation: z.string().describe('The English translation of the Hadith.'),
+  arabicText: z.string().describe('The original Arabic text of the Hadith.'),
   source: z.string().describe('The source of the Hadith (e.g., Sahih al-Bukhari 1).'),
 });
 export type DailyHadithOutput = z.infer<typeof DailyHadithOutputSchema>;
@@ -26,7 +27,7 @@ const prompt = ai.definePrompt({
   prompt: `Provide a single, impactful Hadith for the day from either Sahih al-Bukhari or Sahih Muslim.
   
 Ensure the Hadith is concise and provides a meaningful piece of wisdom or guidance.
-Return the Hadith text and its specific source, including the book and number.`,
+Return the Hadith in its original Arabic text, its English translation, and its specific source, including the book and number.`,
 });
 
 const dailyHadithFlow = ai.defineFlow(
