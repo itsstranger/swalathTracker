@@ -119,7 +119,10 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
                         className="text-lg"
                         {...field}
                         value={field.value || ''}
-                        onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? 0 : parseInt(value, 10));
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
