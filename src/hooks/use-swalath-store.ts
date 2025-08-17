@@ -73,6 +73,21 @@ export function useSwalathStore() {
         }, (error) => {
           console.error("Error listening to Firestore:", error);
         });
+      } else {
+        // Not logged in, ensure we are not subscribed to anything
+        if (unsubscribe) unsubscribe();
+        // Reload from local storage in case of logout
+        try {
+            const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
+            if (storedData) {
+              setEntries(JSON.parse(storedData));
+            } else {
+              setEntries([]);
+            }
+          } catch (error) {
+            console.error('Failed to load local data after logout', error);
+            setEntries([]);
+          }
       }
       setIsInitialized(true);
     };
