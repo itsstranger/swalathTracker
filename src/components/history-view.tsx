@@ -2,7 +2,7 @@
 
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
-import { BarChart, MoreHorizontal, Pencil, Percent, Trash2 } from 'lucide-react';
+import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 import {
@@ -107,6 +107,8 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     setEditingEntry(null);
   }
 
+  const dateRangeLabel = latestEntries.length > 0 ? `${format(new Date(latestEntries[0].id), 'd MMM')} - ${format(new Date(latestEntries[latestEntries.length - 1].id), 'd MMM yyyy')}` : '';
+
   return (
     <>
       <Card className="rounded-2xl border shadow-sm">
@@ -120,16 +122,46 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="rounded-xl shadow-none border-none bg-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
+                    <Sigma className="w-3 h-3 mr-1" />
+                    Total
+                  </Badge>
+                </div>
+                <p className="text-4xl font-bold">{totalSwalaths}</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">{dateRangeLabel}</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-xl shadow-none border-none bg-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
+                    <Percent className="w-3 h-3 mr-1" />
+                    Average
+                  </Badge>
+                </div>
+                <p className="text-4xl font-bold">{averageCompletion}%</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">{dateRangeLabel}</p>
+              </CardContent>
+            </Card>
+          </div>
+        
           <Card className="rounded-xl shadow-none border-none bg-card">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 rounded-md">
-                        <Percent className="w-3 h-3 mr-1" />
-                        Average Completion
+                        <BarChart className="w-3 h-3 mr-1" />
+                        Weekly Chart
                     </Badge>
-                    <span className="text-xs text-muted-foreground">{latestEntries.length > 0 ? `${format(new Date(latestEntries[0].id), 'd MMM')} - ${format(new Date(latestEntries[latestEntries.length - 1].id), 'd MMM yyyy')}` : ''}</span>
+                    <span className="text-xs text-muted-foreground">{dateRangeLabel}</span>
                 </div>
-                <p className="text-4xl font-bold">{averageCompletion}%</p>
               </CardHeader>
               <CardContent>
                 {chartData.length > 0 ? (
