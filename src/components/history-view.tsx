@@ -48,6 +48,7 @@ import {
 } from '@/components/ui/sheet';
 import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
+import { cn } from '@/lib/utils';
 
 interface HistoryViewProps {
   entries: SwalathEntry[];
@@ -80,6 +81,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
   const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(a.id).getTime() - new Date(b.id).getTime()), [entries]);
 
@@ -274,7 +276,9 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                 {filteredEntries.length > 0 ? (
                     <div className="space-y-2">
                         {filteredEntries.slice().reverse().map(entry => (
-                            <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
+                            <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50", {
+                                'bg-primary/10': entry.id === today,
+                            })}>
                                 <div>
                                     <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
                                     <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
