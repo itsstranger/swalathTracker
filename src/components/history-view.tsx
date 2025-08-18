@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO } from 'date-fns';
+import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, endOfMonth } from 'date-fns';
 
 import {
   Card,
@@ -76,18 +76,19 @@ const parseDateAsLocal = (dateString: string) => {
 
 
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
-  const { addOrUpdateEntry } = useSwalathStore();
+  const { addOrUpdateEntry, setSelectedEntryId } = useSwalathStore();
   const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
 
   const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(a.id).getTime() - new Date(b.id).getTime()), [entries]);
 
-  const filteredEntries = useMemo(() => {
+  const { filteredEntries, dateRangeLabel } = useMemo(() => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
-    
     let startDate: Date;
+    let label: string;
+
     switch (range) {
         case 'week':
             startDate = subDays(now, 6);
@@ -96,17 +97,27 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             startDate = subDays(now, 29);
             break;
         case 'year':
-            startDate = subDays(now, 364);
+            startDate = subMonths(now, 11);
             break;
         default:
             startDate = subDays(now, 6);
     }
     startDate.setHours(0, 0, 0, 0);
 
-    return sortedEntries.filter(entry => {
+    const relevantEntries = sortedEntries.filter(entry => {
         const entryDate = parseDateAsLocal(entry.id);
         return entryDate >= startDate && entryDate <= now;
     });
+
+    if (relevantEntries.length > 0) {
+      const firstDate = parseDateAsLocal(relevantEntries[0].id);
+      const lastDate = parseDateAsLocal(relevantEntries[relevantEntries.length - 1].id);
+      label = `${format(startDate, 'd MMM')} - ${format(now, 'd MMM yyyy')}`;
+    } else {
+      label = `this ${range}`;
+    }
+
+    return { filteredEntries: relevantEntries, dateRangeLabel: label };
   }, [sortedEntries, range]);
 
   
@@ -119,11 +130,38 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
 
   const chartData = useMemo(() => {
-    return filteredEntries.map((entry) => ({
-      date: format(parseDateAsLocal(entry.id), 'dd MMM'),
-      total: entry.total,
-    }));
-  }, [filteredEntries]);
+    const now = new Date();
+    const entriesById = new Map(entries.map(e => [e.id, e.total]));
+
+    if (range === 'year') {
+        const yearInterval = { start: subMonths(startOfMonth(now), 11), end: now };
+        const months = eachMonthOfInterval(yearInterval);
+        
+        return months.map(monthStart => {
+            const monthEntries = entries.filter(entry => {
+                const entryDate = parseDateAsLocal(entry.id);
+                return getYear(entryDate) === getYear(monthStart) && getMonth(entryDate) === getMonth(monthStart);
+            });
+            const total = monthEntries.reduce((acc, curr) => acc + curr.total, 0);
+            return {
+                date: format(monthStart, 'MMM'),
+                total,
+            };
+        });
+    }
+
+    const daysCount = range === 'week' ? 7 : 30;
+    const interval = { start: subDays(now, daysCount - 1), end: now };
+    const allDays = eachDayOfInterval(interval);
+
+    return allDays.map(day => {
+        const formattedDate = format(day, 'yyyy-MM-dd');
+        return {
+            date: format(day, 'dd MMM'),
+            total: entriesById.get(formattedDate) || 0,
+        };
+    });
+  }, [range, entries]);
 
   const handleDeleteConfirm = () => {
     if (deleteCandidate) {
@@ -133,23 +171,22 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
   };
   
   const handleEdit = (entry: SwalathEntry) => {
+    setSelectedEntryId(entry.id);
     setEditingEntry(entry);
   };
   
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
     setEditingEntry(null);
+    setSelectedEntryId(null);
   }
 
-  const dateRangeLabel = useMemo(() => {
-    if (filteredEntries.length === 0) {
-      return `this ${range}`;
+  const handleEditSheetOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setEditingEntry(null);
+      setSelectedEntryId(null);
     }
-    const firstDate = parseDateAsLocal(filteredEntries[0].id);
-    const lastDate = parseDateAsLocal(filteredEntries[filteredEntries.length - 1].id);
-    return `${format(firstDate, 'd MMM')} - ${format(lastDate, 'd MMM yyyy')}`;
-  }, [filteredEntries, range]);
-
+  }
 
   const entryDate = editingEntry?.id ? parseDateAsLocal(editingEntry.id) : new Date();
   
@@ -213,7 +250,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                                     dataKey="total"
                                     radius={10} 
                                     fill="hsl(var(--primary))"
-                                    barSize={range === 'year' ? 5 : (range === 'month' ? 10 : 20)}
+                                    barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
                                 />
                                 </RechartsBarChart>
                             </ChartContainer>
@@ -287,7 +324,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sheet open={!!editingEntry} onOpenChange={(open) => !open && setEditingEntry(null)}>
+      <Sheet open={!!editingEntry} onOpenChange={handleEditSheetOpenChange}>
         <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
             <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">Edit Entry</SheetTitle>
@@ -298,8 +335,9 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             <div className="flex-grow overflow-y-auto px-6">
               <SwalathForm
                   entry={editingEntry}
+                  selectedEntryId={editingEntry?.id ?? null}
                   onSave={handleSave}
-                  onCancel={() => setEditingEntry(null)}
+                  onCancel={() => handleEditSheetOpenChange(false)}
               />
             </div>
         </SheetContent>
