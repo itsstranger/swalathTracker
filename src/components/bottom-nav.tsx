@@ -1,7 +1,7 @@
 
 'use client';
 
-import { BarChart3, Calendar, Plus, Search, Settings } from 'lucide-react';
+import { BarChart3, Calendar, Plus, Settings, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -15,11 +15,14 @@ import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import type { SwalathEntry } from '@/lib/types';
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 export const BottomNav = () => {
   const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries } = useSwalathStore();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isCustomDateSheetOpen, setIsCustomDateSheetOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isClient, setIsClient] = useState(false);
   const selectedEntry = getSelectedEntry();
   
@@ -31,6 +34,7 @@ export const BottomNav = () => {
     addOrUpdateEntry(entry);
     setSelectedEntryId(null);
     setIsSheetOpen(false);
+    setIsCustomDateSheetOpen(false);
   }
 
   const handleOpenForm = () => {
@@ -51,11 +55,25 @@ export const BottomNav = () => {
     setIsSheetOpen(isOpen);
   }
 
+  const handleCustomDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    setSelectedDate(date);
+    const formattedId = format(date, 'yyyy-MM-dd');
+    const existingEntry = entries.find(e => e.id === formattedId);
+    if (existingEntry) {
+      setSelectedEntryId(existingEntry.id);
+    } else {
+      setSelectedEntryId(formattedId);
+    }
+    setIsCustomDateSheetOpen(false);
+    setTimeout(() => setIsSheetOpen(true), 100);
+  }
+
   if (!isClient) {
     return null; 
   }
 
-  const entryDate = selectedEntry?.id ? new Date(selectedEntry.id) : new Date();
+  const entryDate = selectedEntry?.id && isValid(new Date(selectedEntry.id)) ? new Date(selectedEntry.id) : new Date();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-card/95 backdrop-blur-sm border-t">
@@ -65,10 +83,32 @@ export const BottomNav = () => {
             <Calendar className="w-6 h-6" />
             <span className="text-xs">Today</span>
           </Button>
-          <Button variant="ghost" className="flex flex-col h-auto p-2 text-muted-foreground">
-            <Search className="w-6 h-6" />
-            <span className="text-xs">Search</span>
-          </Button>
+          
+          <Sheet open={isCustomDateSheetOpen} onOpenChange={setIsCustomDateSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" className="flex flex-col h-auto p-2">
+                <CalendarPlus className="w-6 h-6" />
+                <span className="text-xs">Custom Date</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-2xl p-0">
+                <SheetHeader className="p-6 pb-2">
+                    <SheetTitle className="text-2xl font-bold">Select a Date</SheetTitle>
+                    <SheetDescription>
+                        Choose a day to add or edit an entry.
+                    </SheetDescription>
+                </SheetHeader>
+                <div className="flex justify-center p-4">
+                    <CalendarComponent
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={handleCustomDateSelect}
+                        className="rounded-md border"
+                        disabled={(date) => date > new Date()}
+                    />
+                </div>
+            </SheetContent>
+          </Sheet>
 
           <Sheet open={isSheetOpen} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
@@ -79,7 +119,7 @@ export const BottomNav = () => {
             <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
               <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">
-                  {selectedEntry?.id ? 'Edit Entry' : "Today's Entry"}
+                  {entries.some(e => e.id === selectedEntry?.id) ? 'Edit Entry' : "New Entry"}
                 </SheetTitle>
                 <SheetDescription>
                   {format(entryDate, "EEEE, MMMM d, yyyy")}
