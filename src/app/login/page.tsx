@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,9 +41,11 @@ export default function LoginPage() {
     },
   });
 
-  if (user) {
-    router.push('/');
-  }
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
