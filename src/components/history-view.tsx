@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { format, startOfWeek, startOfMonth, startOfYear, subDays } from 'date-fns';
 
 import {
   Card,
@@ -78,17 +78,32 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    let daysToSubtract = 7;
-    if (range === 'month') daysToSubtract = 30;
-    if (range === 'year') daysToSubtract = 365;
+    now.setHours(23, 59, 59, 999); // Ensure we include today
     
-    const startDate = subDays(now, daysToSubtract - 1);
+    let startDate: Date;
+    switch (range) {
+        case 'week':
+            startDate = subDays(now, 6);
+            break;
+        case 'month':
+            startDate = subDays(now, 29);
+            break;
+        case 'year':
+            startDate = subDays(now, 364);
+            break;
+        default:
+            startDate = subDays(now, 6);
+    }
     startDate.setHours(0, 0, 0, 0);
 
     return sortedEntries.filter(entry => {
         const entryDate = new Date(entry.id);
-        entryDate.setHours(0,0,0,0);
-        return entryDate >= startDate;
+        // Adjust entry date to be at the start of its day for comparison
+        entryDate.setHours(0, 0, 0, 0);
+        const timeZoneOffset = entryDate.getTimezoneOffset() * 60000;
+        const adjustedEntryDate = new Date(entryDate.getTime() + timeZoneOffset);
+
+        return adjustedEntryDate >= startDate && adjustedEntryDate <= now;
     });
   }, [sortedEntries, range]);
 
@@ -124,7 +139,15 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     setEditingEntry(null);
   }
 
-  const dateRangeLabel = filteredEntries.length > 0 ? `${format(new Date(filteredEntries[0].id), 'd MMM')} - ${format(new Date(filteredEntries[filteredEntries.length - 1].id), 'd MMM yyyy')}` : 'No data for this period';
+  const dateRangeLabel = useMemo(() => {
+    if (filteredEntries.length === 0) {
+      return `this ${range}`;
+    }
+    const firstDate = new Date(filteredEntries[0].id);
+    const lastDate = new Date(filteredEntries[filteredEntries.length - 1].id);
+    return `${format(firstDate, 'd MMM')} - ${format(lastDate, 'd MMM yyyy')}`;
+  }, [filteredEntries, range]);
+
 
   const entryDate = editingEntry?.id ? new Date(editingEntry.id) : new Date();
   
@@ -155,7 +178,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                     <p className="text-4xl font-bold">{totalSwalaths}</p>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-xs text-muted-foreground">Total swalaths for {dateRangeLabel}.</p>
+                    <p className="text-xs text-muted-foreground">Total for {dateRangeLabel}.</p>
                 </CardContent>
             </Card>
 
