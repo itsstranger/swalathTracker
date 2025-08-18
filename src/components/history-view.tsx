@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, startOfWeek, startOfMonth, startOfYear, subDays } from 'date-fns';
+import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO } from 'date-fns';
 
 import {
   Card,
@@ -68,6 +68,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+// Helper to parse date string as local date
+const parseDateAsLocal = (dateString: string) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+};
+
+
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
   const { addOrUpdateEntry } = useSwalathStore();
   const [range, setRange] = useState<Range>('week');
@@ -78,7 +85,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    now.setHours(23, 59, 59, 999); // Ensure we include today
+    now.setHours(23, 59, 59, 999);
     
     let startDate: Date;
     switch (range) {
@@ -97,13 +104,8 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     startDate.setHours(0, 0, 0, 0);
 
     return sortedEntries.filter(entry => {
-        const entryDate = new Date(entry.id);
-        // Adjust entry date to be at the start of its day for comparison
-        entryDate.setHours(0, 0, 0, 0);
-        const timeZoneOffset = entryDate.getTimezoneOffset() * 60000;
-        const adjustedEntryDate = new Date(entryDate.getTime() + timeZoneOffset);
-
-        return adjustedEntryDate >= startDate && adjustedEntryDate <= now;
+        const entryDate = parseDateAsLocal(entry.id);
+        return entryDate >= startDate && entryDate <= now;
     });
   }, [sortedEntries, range]);
 
@@ -118,7 +120,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
 
   const chartData = useMemo(() => {
     return filteredEntries.map((entry) => ({
-      date: format(new Date(entry.id), 'dd MMM'),
+      date: format(parseDateAsLocal(entry.id), 'dd MMM'),
       total: entry.total,
     }));
   }, [filteredEntries]);
@@ -143,13 +145,13 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     if (filteredEntries.length === 0) {
       return `this ${range}`;
     }
-    const firstDate = new Date(filteredEntries[0].id);
-    const lastDate = new Date(filteredEntries[filteredEntries.length - 1].id);
+    const firstDate = parseDateAsLocal(filteredEntries[0].id);
+    const lastDate = parseDateAsLocal(filteredEntries[filteredEntries.length - 1].id);
     return `${format(firstDate, 'd MMM')} - ${format(lastDate, 'd MMM yyyy')}`;
   }, [filteredEntries, range]);
 
 
-  const entryDate = editingEntry?.id ? new Date(editingEntry.id) : new Date();
+  const entryDate = editingEntry?.id ? parseDateAsLocal(editingEntry.id) : new Date();
   
   const handleRangeChange = (newRange: Range) => {
     setRange(newRange);
@@ -237,8 +239,8 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                         {filteredEntries.slice().reverse().map(entry => (
                             <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50">
                                 <div>
-                                    <p className="font-semibold">{format(new Date(entry.id), 'EEEE')}</p>
-                                    <p className="text-sm text-muted-foreground">{format(new Date(entry.id), 'MMMM d, yyyy')}</p>
+                                    <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
+                                    <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <p className="font-bold text-lg">{entry.total}</p>
@@ -275,7 +277,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the entry for {deleteCandidate && format(new Date(deleteCandidate), 'MMM d, yyyy')}.
+              This action cannot be undone. This will permanently delete the entry for {deleteCandidate && format(parseDateAsLocal(deleteCandidate), 'MMM d, yyyy')}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
