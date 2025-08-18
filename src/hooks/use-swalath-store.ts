@@ -1,4 +1,4 @@
-
+// src/hooks/use-swalath-store.ts
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -20,11 +20,10 @@ export function useSwalathStore() {
   const { user, loading: authLoading } = useAuth();
   const [entries, setEntries] = useState<SwalathEntry[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
-  // This effect handles the initial data loading and synchronization.
   useEffect(() => {
-    // We must wait until the auth state is fully resolved before doing anything.
     if (authLoading) {
       return;
     }
@@ -32,7 +31,6 @@ export function useSwalathStore() {
     let unsubscribe: (() => void) | undefined;
 
     if (user) {
-      // User is logged in. Initialize Firestore sync.
       const userEntriesCol = collection(firestore, 'users', user.uid, 'entries');
       
       const syncLocalData = async () => {
@@ -41,22 +39,24 @@ export function useSwalathStore() {
           try {
             const localEntries: SwalathEntry[] = JSON.parse(localData);
             if (localEntries.length > 0) {
+              setIsSyncing(true);
               const batch = writeBatch(firestore);
               localEntries.forEach((entry) => {
                 const docRef = doc(userEntriesCol, entry.id);
-                batch.set(docRef, entry, { merge: true }); // Use merge to not overwrite newer data
+                batch.set(docRef, entry, { merge: true });
               });
               await batch.commit();
               window.localStorage.removeItem(LOCAL_STORE_KEY);
+              setIsSyncing(false);
             }
           } catch (error) {
             console.error("Failed to sync local data to Firestore", error);
+            setIsSyncing(false);
           }
         }
       };
       
       syncLocalData().then(() => {
-          // After syncing (if any), listen for real-time updates from Firestore.
           unsubscribe = onSnapshot(userEntriesCol, (snapshot) => {
             const firestoreEntries: SwalathEntry[] = [];
             snapshot.forEach((doc) => {
@@ -66,12 +66,11 @@ export function useSwalathStore() {
             setIsInitialized(true);
           }, (error) => {
             console.error("Error listening to Firestore:", error);
-            setIsInitialized(true); // Still initialized, even if there's an error.
+            setIsInitialized(true);
           });
       });
 
     } else {
-      // User is logged out. Load from local storage.
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORE_KEY);
         setEntries(storedData ? JSON.parse(storedData) : []);
@@ -82,7 +81,6 @@ export function useSwalathStore() {
       setIsInitialized(true);
     }
   
-    // Cleanup function to unsubscribe from the Firestore listener when the component unmounts or user changes.
     return () => {
       if (unsubscribe) {
         unsubscribe();
@@ -98,7 +96,6 @@ export function useSwalathStore() {
         await setDoc(entryRef, newEntry, { merge: true });
       } catch (error) {
         console.error("Error saving entry to Firestore:", error);
-        // Here you might want to add a toast to inform the user about the error
       }
     } else {
       setEntries((prevEntries) => {
@@ -160,5 +157,6 @@ export function useSwalathStore() {
     setSelectedEntryId,
     getSelectedEntry,
     isInitialized,
+    isSyncing,
   };
 }
