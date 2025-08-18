@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, endOfMonth } from 'date-fns';
+import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, endOfMonth, isToday } from 'date-fns';
 
 import {
   Card,
@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart as RechartsBarChart, XAxis } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, XAxis, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
 import type { SwalathEntry } from '@/lib/types';
 import {
@@ -81,15 +81,13 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
   const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
-  const today = format(new Date(), 'yyyy-MM-dd');
 
-  const sortedEntries = useMemo(() => entries.sort((a, b) => new Date(a.id).getTime() - new Date(b.id).getTime()), [entries]);
+  const sortedEntries = useMemo(() => entries.sort((a, b) => parseDateAsLocal(a.id).getTime() - parseDateAsLocal(b.id).getTime()), [entries]);
 
   const { filteredEntries, dateRangeLabel } = useMemo(() => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
     let startDate: Date;
-    let label: string;
 
     switch (range) {
         case 'week':
@@ -111,12 +109,11 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
         return entryDate >= startDate && entryDate <= now;
     });
 
-    if (relevantEntries.length > 0) {
-      const firstDate = parseDateAsLocal(relevantEntries[0].id);
-      const lastDate = parseDateAsLocal(relevantEntries[relevantEntries.length - 1].id);
+    let label = `this ${range}`;
+    if (range === 'year') {
+        label = `the last 12 months`
+    } else if (relevantEntries.length > 0) {
       label = `${format(startDate, 'd MMM')} - ${format(now, 'd MMM yyyy')}`;
-    } else {
-      label = `this ${range}`;
     }
 
     return { filteredEntries: relevantEntries, dateRangeLabel: label };
@@ -148,6 +145,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             return {
                 date: format(monthStart, 'MMM'),
                 total,
+                isToday: getYear(monthStart) === getYear(now) && getMonth(monthStart) === getMonth(now)
             };
         });
     }
@@ -161,6 +159,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
         return {
             date: format(day, 'dd MMM'),
             total: entriesById.get(formattedDate) || 0,
+            isToday: isToday(day),
         };
     });
   }, [range, entries]);
@@ -250,10 +249,13 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                                 />
                                 <Bar 
                                     dataKey="total"
-                                    radius={10} 
-                                    fill="hsl(var(--primary))"
+                                    radius={10}
                                     barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
-                                />
+                                >
+                                    {chartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.isToday ? 'hsl(var(--primary))' : 'hsl(var(--chart-2))'} />
+                                    ))}
+                                </Bar>
                                 </RechartsBarChart>
                             </ChartContainer>
                         </>
@@ -277,7 +279,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                     <div className="space-y-2">
                         {filteredEntries.slice().reverse().map(entry => (
                             <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50", {
-                                'bg-primary/10': entry.id === today,
+                                'bg-primary/10': isToday(parseDateAsLocal(entry.id)),
                             })}>
                                 <div>
                                     <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
