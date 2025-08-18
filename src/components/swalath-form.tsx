@@ -45,6 +45,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface SwalathFormProps {
   entry: SwalathEntry | null;
+  selectedEntryId: string | null;
   onSave: (entry: SwalathEntry) => void;
   onCancel: () => void;
 }
@@ -72,7 +73,7 @@ const getInitialValues = (entry: SwalathEntry | null): FormData => {
   };
 };
 
-export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) => {
+export const SwalathForm: FC<SwalathFormProps> = ({ entry, selectedEntryId, onSave, onCancel }) => {
   const { toast } = useToast();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -95,16 +96,22 @@ export const SwalathForm: FC<SwalathFormProps> = ({ entry, onSave, onCancel }) =
   }, [watchedValues]);
 
   const onSubmit = (values: FormData) => {
-    const entryId = entry?.id || today;
+    const entryId = entry?.id || selectedEntryId || today;
     const newEntry: SwalathEntry = {
       id: entryId,
       ...values,
       total: totalSwalaths,
     };
     onSave(newEntry);
+    
+    const parseDateAsLocal = (dateString: string) => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
     toast({
       title: 'Entry Saved',
-      description: `Your swalath count for ${format(new Date(entryId), 'MMM d, yyyy')} has been saved.`,
+      description: `Your swalath count for ${format(parseDateAsLocal(entryId), 'MMM d, yyyy')} has been saved.`,
     });
   };
 

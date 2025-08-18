@@ -15,11 +15,11 @@ import { SwalathForm } from './swalath-form';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import type { SwalathEntry } from '@/lib/types';
 import { useState, useEffect } from 'react';
-import { format, isValid } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 export const BottomNav = () => {
-  const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries } = useSwalathStore();
+  const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries, selectedEntryId } = useSwalathStore();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isCustomDateSheetOpen, setIsCustomDateSheetOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -73,7 +73,12 @@ export const BottomNav = () => {
     return null; 
   }
 
-  const entryDate = selectedEntry?.id && isValid(new Date(selectedEntry.id)) ? new Date(selectedEntry.id) : new Date();
+  const parseDateAsLocal = (dateString: string) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+  
+  const entryDate = selectedEntryId ? parseDateAsLocal(selectedEntryId) : new Date();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-card/95 backdrop-blur-sm border-t">
@@ -128,6 +133,7 @@ export const BottomNav = () => {
               <div className="flex-grow overflow-y-auto px-6">
                 <SwalathForm
                   entry={selectedEntry}
+                  selectedEntryId={selectedEntryId}
                   onSave={handleSave}
                   onCancel={() => {
                     setSelectedEntryId(null);
