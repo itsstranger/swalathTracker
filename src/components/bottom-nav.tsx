@@ -17,6 +17,7 @@ import type { SwalathEntry } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { format, isValid, parseISO } from 'date-fns';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import Link from 'next/link';
 
 export const BottomNav = () => {
   const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries, selectedEntryId } = useSwalathStore();
@@ -84,10 +85,12 @@ export const BottomNav = () => {
     <div className="fixed bottom-0 left-0 right-0 h-20 bg-card/95 backdrop-blur-sm border-t">
       <div className="container mx-auto h-full">
         <div className="flex justify-between items-center h-full">
-          <Button variant="ghost" className="flex flex-col h-auto p-2">
-            <Calendar className="w-6 h-6" />
-            <span className="text-xs">Today</span>
-          </Button>
+          <Link href="/" passHref>
+            <Button variant="ghost" className="flex flex-col h-auto p-2">
+              <Calendar className="w-6 h-6" />
+              <span className="text-xs">Today</span>
+            </Button>
+          </Link>
           
           <Sheet open={isCustomDateSheetOpen} onOpenChange={setIsCustomDateSheetOpen}>
             <SheetTrigger asChild>
@@ -148,10 +151,12 @@ export const BottomNav = () => {
             <BarChart3 className="w-6 h-6" />
             <span className="text-xs">Stats</span>
           </Button>
-          <Button variant="ghost" className="flex flex-col h-auto p-2 text-muted-foreground">
-            <Settings className="w-6 h-6" />
-            <span className="text-xs">Settings</span>
-          </Button>
+          <Link href="/settings" passHref>
+            <Button variant="ghost" className="flex flex-col h-auto p-2">
+              <Settings className="w-6 h-6" />
+              <span className="text-xs">Settings</span>
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 'use client';
 
 import type { FC } from 'react';
-import { Bell, LogIn, LogOut, User } from 'lucide-react';
+import { Bell, Cog, LogIn, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,12 @@ export const Header: FC = () => {
                 <DropdownMenuItem>
                   <User className="mr-2" />
                   Profile
+                </DropdownMenuItem>
+              </Link>
+               <Link href="/settings" passHref>
+                <DropdownMenuItem>
+                  <Cog className="mr-2" />
+                  Settings
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuItem onClick={logout}>
