@@ -1,7 +1,7 @@
 
 'use client';
 
-import { CalendarPlus, Plus, Settings, Home } from 'lucide-react';
+import { CalendarPlus, Plus, Settings, Home, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -86,18 +86,24 @@ export const BottomNav = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
         <Popover open={isFabMenuOpen} onOpenChange={setIsFabMenuOpen}>
           <PopoverTrigger asChild>
             <Button
               size="lg"
               className="rounded-full w-16 h-16 text-3xl shadow-lg"
             >
-              <Plus className={cn("transition-transform duration-300", { "rotate-45": isFabMenuOpen })} />
+              <Menu className={cn("transition-transform duration-300", { "rotate-90": isFabMenuOpen })} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2 mb-2" align="end">
+          <PopoverContent className="w-auto p-2 mb-2" align="center" side="top">
             <div className="flex flex-col gap-2">
+               <Link href="/" passHref>
+                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
+                  <Home className="mr-2" />
+                  Home
+                </Button>
+              </Link>
               <Button variant="ghost" onClick={handleOpenFormForToday} className="justify-start">
                 <Plus className="mr-2" />
                 New Entry
@@ -110,12 +116,6 @@ export const BottomNav = () => {
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
                   <Settings className="mr-2" />
                   Settings
-                </Button>
-              </Link>
-               <Link href="/" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <Home className="mr-2" />
-                  Home
                 </Button>
               </Link>
             </div>
