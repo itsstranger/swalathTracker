@@ -38,9 +38,9 @@ const rawatibPrayers: { id: keyof RawatibPrayers, label: string }[] = [
 ]
 
 const voluntaryPrayers = [
-  { id: 'tahajjud', label: 'Tahajjud' },
-  { id: 'dhuha', label: 'Dhuha' },
-  { id: 'witr', label: 'Witr' },
+  { id: 'tahajjud', label: 'Tahajjud', max: 20, step: 2 },
+  { id: 'dhuha', label: 'Dhuha', max: 12, step: 2 },
+  { id: 'witr', label: 'Witr', max: 11, step: 2, min: 1 },
 ];
 
 export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }) => {
@@ -189,15 +189,27 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                         <Input
                             id={item.id}
                             type="number"
-                            min="0"
+                            min={item.min || 0}
+                            max={item.max}
+                            step={item.step || 1}
                             placeholder="Raka'hs"
                             className="w-28"
                             value={prayerData[item.id as 'tahajjud'] || ''}
                             onChange={(e) => {
-                                const value = e.target.value;
+                                let value = e.target.valueAsNumber;
+                                if (isNaN(value)) value = 0;
+                                if (value > item.max) value = item.max;
+
+                                if (item.id === 'witr') {
+                                    if (value > 0 && value % 2 === 0) {
+                                        // if user enters an even number, subtract 1 to make it odd
+                                        value = Math.max(item.min || 1, value - 1);
+                                    }
+                                }
+                                
                                 handleVoluntaryPrayerChange(
                                     item.id as 'tahajjud' | 'dhuha' | 'witr',
-                                    value === '' ? 0 : parseInt(value, 10)
+                                    value
                                 );
                             }}
                         />
