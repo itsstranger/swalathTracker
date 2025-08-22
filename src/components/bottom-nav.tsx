@@ -1,7 +1,7 @@
 
 'use client';
 
-import { CalendarPlus, Plus, Settings, Home, Menu } from 'lucide-react';
+import { CalendarPlus, Plus, Settings, Home, Menu, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -101,16 +101,22 @@ export const BottomNav = () => {
                <Link href="/" passHref>
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
                   <Home className="mr-2" />
-                  Home
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/swalath" passHref>
+                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
+                  <Bot className="mr-2" />
+                  Swalath Counter
                 </Button>
               </Link>
               <Button variant="ghost" onClick={handleOpenFormForToday} className="justify-start">
                 <Plus className="mr-2" />
-                New Entry
+                New Swalath Entry
               </Button>
               <Button variant="ghost" onClick={handleOpenCustomDate} className="justify-start">
                 <CalendarPlus className="mr-2" />
-                Custom Date
+                Swalath Custom Date
               </Button>
               <Link href="/settings" passHref>
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
@@ -129,7 +135,7 @@ export const BottomNav = () => {
             <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">Select a Date</SheetTitle>
                 <SheetDescription>
-                    Choose a day to add or edit an entry.
+                    Choose a day to add or edit a Swalath entry.
                 </SheetDescription>
             </SheetHeader>
             <div className="flex justify-center p-4">
@@ -148,7 +154,7 @@ export const BottomNav = () => {
         <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
           <SheetHeader className="p-6 pb-2">
             <SheetTitle className="text-2xl font-bold">
-              {entries.some(e => e.id === selectedEntry?.id) ? 'Edit Entry' : "New Entry"}
+              {entries.some(e => e.id === selectedEntry?.id) ? 'Edit Swalath Entry' : "New Swalath Entry"}
             </SheetTitle>
             <SheetDescription>
               {format(entryDate, "EEEE, MMMM d, yyyy")}
