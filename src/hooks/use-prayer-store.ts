@@ -25,6 +25,7 @@ const defaultPrayerState: PrayerTracking = {
       beforeDhuhr: false,
       afterDhuhr: false,
       afterMaghrib: false,
+      beforeIsha: false,
       afterIsha: false,
     },
     tahajjud: false,
@@ -44,7 +45,7 @@ export function usePrayerStore() {
         const parsed = JSON.parse(localData);
         if (parsed.id === todayId) {
             // Basic migration for old rawathib structure
-            if (typeof parsed.data.rawathib === 'boolean') {
+            if (typeof parsed.data.rawathib === 'boolean' || !('beforeIsha' in parsed.data.rawathib)) {
               parsed.data.rawathib = defaultPrayerState.rawathib;
             }
             return parsed.data;
@@ -64,7 +65,7 @@ export function usePrayerStore() {
         if (doc.exists()) {
           const data = doc.data() as PrayerTracking;
           // Basic migration for old rawathib structure from firestore
-          if (typeof data.rawathib === 'boolean') {
+          if (typeof data.rawathib === 'boolean' || !('beforeIsha' in data.rawathib)) {
             data.rawathib = defaultPrayerState.rawathib;
           }
           setPrayerData(data);

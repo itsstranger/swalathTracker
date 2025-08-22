@@ -29,9 +29,10 @@ const dailyPrayers: { id: keyof PrayerTracking; label: PrayerName, icon: React.E
 
 const rawatibPrayers: { id: keyof RawatibPrayers, label: string }[] = [
     { id: 'beforeFajr', label: 'Before Fajr (2)' },
-    { id: 'beforeDhuhr', label: 'Before Dhuhr (4)' },
+    { id: 'beforeDhuhr', label: 'Before Dhuhr (2)' },
     { id: 'afterDhuhr', label: 'After Dhuhr (2)' },
     { id: 'afterMaghrib', label: 'After Maghrib (2)' },
+    { id: 'beforeIsha', label: 'Before Isha (2)' },
     { id: 'afterIsha', label: 'After Isha (2)' },
 ]
 
@@ -156,7 +157,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                     <Heart className="text-pink-500" />
                     Rawatib Prayers (Sunnah Mu'akkadah)
                 </CardTitle>
-                <CardDescription>The 12 confirmed voluntary prayers linked to the five daily prayers.</CardDescription>
+                <CardDescription>The confirmed voluntary prayers linked to the five daily prayers.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {rawatibPrayers.map((item) => (
