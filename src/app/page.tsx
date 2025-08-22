@@ -2,9 +2,8 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BookOpen, Moon, ShieldCheck } from 'lucide-react';
+import { BookOpen, Bot, Moon, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { DailyInsight } from '@/components/daily-insight';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
@@ -32,6 +31,12 @@ export default function Home() {
       description: 'Mark your daily Duas and supplications.',
       icon: <Moon className="w-8 h-8 text-primary" />,
       link: '/duas'
+    },
+    {
+      title: 'Swalath Counter',
+      description: 'A simple counter to track total Swalaths for the day.',
+      icon: <Bot className="w-8 h-8 text-primary" />,
+      link: '/swalath'
     }
   ];
 
@@ -47,7 +52,7 @@ export default function Home() {
             </CardHeader>
           </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {dashboardItems.map((item) => (
               <Link href={item.link} key={item.title} passHref>
                 <Card className="hover:bg-muted/50 transition-colors h-full">
@@ -67,11 +72,6 @@ export default function Home() {
 
           <DailyInsight entry={todaysEntry} />
 
-          <Link href="/swalath" passHref>
-            <Button className="w-full" size="lg" variant="outline">
-              Go to Swalath Counter
-            </Button>
-          </Link>
         </div>
       </div>
     </main>
