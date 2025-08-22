@@ -18,7 +18,7 @@ export default function QuranPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Quran Reading</CardTitle>
-                            <CardDescription>Log your daily recitation and special Surahs.</CardDescription>
+                            <CardDescription>Log your daily recitation and track important Surahs.</CardDescription>
                         </CardHeader>
                     </Card>
                     <QuranTracker isFriday={isFriday} />
