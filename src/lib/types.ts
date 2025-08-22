@@ -15,6 +15,7 @@ export type PrayerType = 'ada' | 'qaza' | null;
 export interface DailyPrayer {
   status: PrayerStatus;
   type: PrayerType;
+  withJamaah?: boolean;
 }
 
 export interface RawatibPrayers {

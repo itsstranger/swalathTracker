@@ -15,11 +15,11 @@ import { format } from 'date-fns';
 const LOCAL_STORE_KEY = 'prayer-tracker-data';
 
 const defaultPrayerState: PrayerTracking = {
-    fajr: { status: 'skipped', type: null },
-    dhuhr: { status: 'skipped', type: null },
-    asr: { status: 'skipped', type: null },
-    maghrib: { status: 'skipped', type: null },
-    isha: { status: 'skipped', type: null },
+    fajr: { status: 'skipped', type: null, withJamaah: false },
+    dhuhr: { status: 'skipped', type: null, withJamaah: false },
+    asr: { status: 'skipped', type: null, withJamaah: false },
+    maghrib: { status: 'skipped', type: null, withJamaah: false },
+    isha: { status: 'skipped', type: null, withJamaah: false },
     rawathib: {
       beforeFajr: false,
       beforeDhuhr: false,

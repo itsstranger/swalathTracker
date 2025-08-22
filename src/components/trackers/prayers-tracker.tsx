@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { PrayerTracking, PrayerName, DailyPrayer, RawatibPrayers } from '@/lib/types';
 import { getCurrentPrayer } from '@/lib/prayer-times';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Sunrise, Sunset, Clock, Star, Heart } from 'lucide-react';
+import { Sun, Moon, Sunrise, Sunset, Clock, Star, Heart, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ interface PrayersTrackerProps {
   onUpdate: (data: PrayerTracking) => void;
 }
 
-const dailyPrayers: { id: keyof PrayerTracking; label: PrayerName, icon: React.ElementType }[] = [
+const dailyPrayersConfig: { id: keyof PrayerTracking; label: PrayerName, icon: React.ElementType }[] = [
   { id: 'fajr', label: 'Fajr', icon: Sunrise },
   { id: 'dhuhr', label: 'Dhuhr', icon: Sun },
   { id: 'asr', label: 'Asr', icon: Sunset },
@@ -45,24 +45,28 @@ const voluntaryPrayers = [
 
 export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }) => {
     const [currentPrayer, setCurrentPrayer] = useState<PrayerName>('Isha');
+    const [isFriday, setIsFriday] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
         setCurrentPrayer(getCurrentPrayer());
+        setIsFriday(new Date().getDay() === 5);
     }, []);
 
     const handleDailyPrayerChange = (prayer: keyof PrayerTracking, prayed: boolean) => {
         const newStatus = prayed ? 'prayed' : 'skipped';
         const newType = prayed ? 'ada' : null;
+        const withJamaah = prayed ? (prayerData[prayer as 'fajr'] as DailyPrayer)?.withJamaah || false : false;
 
         onUpdate({
             ...prayerData,
-            [prayer]: { status: newStatus, type: newType },
+            [prayer]: { status: newStatus, type: newType, withJamaah },
         });
 
         if (prayed) {
+            const prayerLabel = isFriday && prayer === 'dhuhr' ? 'Jumu\'ah' : dailyPrayersConfig.find(p => p.id === prayer)?.label;
             toast({
-                title: `${dailyPrayers.find(p => p.id === prayer)?.label} prayer marked as complete.`,
+                title: `${prayerLabel} prayer marked as complete.`,
                 description: "Masha'Allah! May Allah accept it.",
             });
         }
@@ -83,7 +87,10 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
         });
     }
 
-    const currentPrayerInfo = dailyPrayers.find(p => p.label === currentPrayer);
+    const currentPrayerInfo = dailyPrayersConfig.find(p => p.label === currentPrayer);
+    const dailyPrayers = isFriday 
+        ? dailyPrayersConfig.map(p => p.id === 'dhuhr' ? { ...p, label: 'Jumu\'ah' as PrayerName } : p)
+        : dailyPrayersConfig;
 
   return (
     <div className="space-y-6">
@@ -94,7 +101,9 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                         <Clock className="text-primary"/>
                         Current Prayer Time
                     </CardTitle>
-                    <CardDescription>It's time for {currentPrayerInfo.label}. Have you prayed?</CardDescription>
+                    <CardDescription>
+                        {isFriday && currentPrayerInfo.label === 'Dhuhr' ? "It's time for Jumu'ah. Have you prayed?" : `It's time for ${currentPrayerInfo.label}. Have you prayed?`}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center gap-4">
                     <currentPrayerInfo.icon className="w-16 h-16 text-primary/50" />
@@ -104,7 +113,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                         variant={(prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' ? 'secondary' : 'default'}
                         onClick={() => handleDailyPrayerChange(currentPrayerInfo.id, (prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status !== 'prayed')}
                     >
-                        {(prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' ? `Undo ${currentPrayerInfo.label}` : `I have prayed ${currentPrayerInfo.label}`}
+                        {(prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' ? `Undo ${isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}` : `I have prayed ${isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}`}
                     </Button>
                 </CardContent>
             </Card>
@@ -131,20 +140,33 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                             />
                         </div>
                         {prayer.status === 'prayed' && (
-                             <RadioGroup
-                                defaultValue={prayer.type || 'ada'}
-                                className="flex gap-4 mt-3 pl-7"
-                                onValueChange={(value) => onUpdate({ ...prayerData, [item.id]: { ...prayer, type: value } })}
-                            >
+                             <div className="mt-3 pl-7 space-y-3">
+                                <RadioGroup
+                                    defaultValue={prayer.type || 'ada'}
+                                    className="flex gap-4"
+                                    onValueChange={(value) => onUpdate({ ...prayerData, [item.id]: { ...prayer, type: value } })}
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="ada" id={`${item.id}-ada`} />
+                                        <Label htmlFor={`${item.id}-ada`}>Ada</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="qaza" id={`${item.id}-qaza`} />
+                                        <Label htmlFor={`${item.id}-qaza`}>Qaza</Label>
+                                    </div>
+                                </RadioGroup>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="ada" id={`${item.id}-ada`} />
-                                    <Label htmlFor={`${item.id}-ada`}>Ada</Label>
+                                    <Checkbox 
+                                        id={`${item.id}-jamaah`} 
+                                        checked={prayer.withJamaah}
+                                        onCheckedChange={(checked) => onUpdate({ ...prayerData, [item.id]: { ...prayer, withJamaah: !!checked }})}
+                                    />
+                                    <Label htmlFor={`${item.id}-jamaah`} className="flex items-center gap-1">
+                                        <Users className="w-4 h-4 text-muted-foreground"/>
+                                        With Jama'ah
+                                    </Label>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="qaza" id={`${item.id}-qaza`} />
-                                    <Label htmlFor={`${item.id}-qaza`}>Qaza</Label>
-                                </div>
-                            </RadioGroup>
+                             </div>
                         )}
                     </div>
                 );
