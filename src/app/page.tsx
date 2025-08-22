@@ -52,10 +52,10 @@ export default function Home() {
             </CardHeader>
           </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col items-center gap-4">
             {dashboardItems.map((item) => (
-              <Link href={item.link} key={item.title} passHref>
-                <Card className="hover:bg-muted/50 transition-colors h-full">
+              <Link href={item.link} key={item.title} passHref className="w-3/4">
+                <Card className="hover:bg-muted/50 transition-colors h-full w-full">
                   <CardHeader className="flex flex-row items-center gap-4">
                     {item.icon}
                     <div>
