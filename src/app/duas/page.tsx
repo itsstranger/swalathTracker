@@ -1,3 +1,4 @@
+
 // src/app/duas/page.tsx
 import { Header } from '@/components/header';
 import { DuaTracker } from '@/components/trackers/dua-tracker';
@@ -10,18 +11,20 @@ export default function DuasPage() {
         <main className="min-h-screen bg-background text-foreground font-body">
             <div className="container mx-auto p-4 md:p-6">
                 <Header />
-                <div className="mt-6 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Daily Duas</CardTitle>
-                            <CardDescription>Mark your daily Duas and supplications.</CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <DuaTracker />
-                    <Button className="w-full" size="lg">
-                        <Save className="mr-2" />
-                        Save Duas
-                    </Button>
+                <div className="mt-6 flex justify-center">
+                    <div className="w-full md:w-3/4 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Daily Duas</CardTitle>
+                                <CardDescription>Mark your daily Duas and supplications.</CardDescription>
+                            </CardHeader>
+                        </Card>
+                        <DuaTracker />
+                        <Button className="w-full" size="lg">
+                            <Save className="mr-2" />
+                            Save Duas
+                        </Button>
+                    </div>
                 </div>
             </div>
         </main>

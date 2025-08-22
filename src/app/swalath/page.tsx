@@ -1,3 +1,4 @@
+
 // src/app/swalath/page.tsx
 'use client';
 
@@ -25,27 +26,29 @@ export default function SwalathTrackerPage() {
     <main className="min-h-screen bg-background text-foreground font-body">
       <div className="container mx-auto p-4 md:p-6">
         <Header />
-        <div className="mt-6 space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Swalath Counter</CardTitle>
-                    <CardDescription>A simple counter to track total Swalaths for the day.</CardDescription>
-                </CardHeader>
-            </Card>
+        <div className="mt-6 flex justify-center">
+            <div className="w-full md:w-3/4 space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Swalath Counter</CardTitle>
+                        <CardDescription>A simple counter to track total Swalaths for the day.</CardDescription>
+                    </CardHeader>
+                </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button onClick={handleOpenForToday} size="lg" variant="outline">
-                    <Plus className="mr-2" />
-                    Add/Edit Today's Entry
-                </Button>
-                <Button onClick={openDatePicker} size="lg" variant="outline">
-                    <CalendarPlus className="mr-2" />
-                    Entry for Custom Date
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button onClick={handleOpenForToday} size="lg" variant="outline">
+                        <Plus className="mr-2" />
+                        Add/Edit Today's Entry
+                    </Button>
+                    <Button onClick={openDatePicker} size="lg" variant="outline">
+                        <CalendarPlus className="mr-2" />
+                        Entry for Custom Date
+                    </Button>
+                </div>
+
+                <HadithBanner />
+                <HistoryView entries={entries} onEdit={(entry) => openFormForDate(entry.id)} onDelete={handleDelete} />
             </div>
-
-            <HadithBanner />
-            <HistoryView entries={entries} onEdit={(entry) => openFormForDate(entry.id)} onDelete={handleDelete} />
         </div>
       </div>
     </main>
