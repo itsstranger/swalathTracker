@@ -47,20 +47,22 @@ export function useQuranStore() {
       const userDocRef = doc(firestore, 'users', user.uid);
 
       unsubscribe = onSnapshot(todayDocRef, async (todayDoc) => {
+        let finalData: QuranTracking;
+        const userDoc = await getDoc(userDocRef);
+        const savedGoal = userDoc.exists() ? userDoc.data()?.quranGoal || 0 : 0;
+
         if (todayDoc.exists()) {
-          setQuranData(todayDoc.data() as QuranTracking);
+          const dailyData = todayDoc.data() as QuranTracking;
+          // Ensure the goal from the user's profile is respected if today's doc is missing it
+          finalData = { ...dailyData, dailyGoalPages: dailyData.dailyGoalPages || savedGoal };
         } else {
-          // No entry for today, let's fetch the goal from the user's profile
-          try {
-            const userDoc = await getDoc(userDocRef);
-            const goal = userDoc.exists() ? userDoc.data()?.quranGoal || 0 : 0;
-            setQuranData({ ...defaultQuranState, dailyGoalPages: goal });
-          } catch (e) {
-            console.error("Failed to fetch user goal", e);
-            setQuranData(defaultQuranState);
-          }
+          // No entry for today, so create a new one using the saved goal
+          finalData = { ...defaultQuranState, dailyGoalPages: savedGoal };
         }
+        
+        setQuranData(finalData);
         setIsInitialized(true);
+
       }, (error) => {
         console.error("Error listening to Firestore:", error);
         setQuranData(getLocalData());
@@ -96,17 +98,16 @@ export function useQuranStore() {
   }, [user, todayId, localDataKey]);
   
   const setDailyGoal = useCallback(async (pages: number) => {
-    if (!quranData) return;
-    
-    const newQuranData = { ...quranData, dailyGoalPages: pages };
+    const newQuranData = { ...(quranData || defaultQuranState), dailyGoalPages: pages };
     setQuranData(newQuranData);
 
     if (user) {
         try {
+            // Save the goal to the main user profile for persistence across days
             const userDocRef = doc(firestore, 'users', user.uid);
-            // Set goal on user profile for persistence across days
             await setDoc(userDocRef, { quranGoal: pages }, { merge: true });
-            // Also update today's document
+            
+            // Also update today's document with the new goal
             const todayDocRef = doc(firestore, 'users', user.uid, 'quran', todayId);
             await setDoc(todayDocRef, { dailyGoalPages: pages }, { merge: true });
         } catch (error) {
