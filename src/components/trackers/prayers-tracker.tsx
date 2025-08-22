@@ -38,7 +38,7 @@ const rawatibPrayers: { id: keyof RawatibPrayers, label: string }[] = [
 ]
 
 const voluntaryPrayers = [
-  { id: 'tahajjud', label: 'Tahajjud', max: 20, step: 2 },
+  { id: 'tahajjud', label: 'Tahajjud', max: 8, step: 2 },
   { id: 'dhuha', label: 'Dhuha', max: 12, step: 2 },
   { id: 'witr', label: 'Witr', max: 11, step: 2, min: 1 },
 ];
