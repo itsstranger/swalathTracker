@@ -22,6 +22,11 @@ export function useSwalathStore() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  
+  // State to control sheet visibility
+  const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
+  const [isDatePickerSheetOpen, setIsDatePickerSheetOpen] = useState(false);
+
 
   useEffect(() => {
     if (authLoading) {
@@ -143,10 +148,18 @@ export function useSwalathStore() {
   }, [user, selectedEntryId]);
   
   const getSelectedEntry = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const entryIdToFind = selectedEntryId || today;
-    return entries.find((e) => e.id === entryIdToFind) || null;
+    if (!selectedEntryId) return null;
+    return entries.find((e) => e.id === selectedEntryId) || null;
   }, [entries, selectedEntryId]);
+
+  const openFormForDate = (dateId: string) => {
+    setSelectedEntryId(dateId);
+    setIsFormSheetOpen(true);
+  };
+
+  const openDatePicker = () => {
+    setIsDatePickerSheetOpen(true);
+  }
 
 
   return { 
@@ -158,5 +171,11 @@ export function useSwalathStore() {
     getSelectedEntry,
     isInitialized,
     isSyncing,
+    isFormSheetOpen,
+    setIsFormSheetOpen,
+    isDatePickerSheetOpen,
+    setIsDatePickerSheetOpen,
+    openFormForDate,
+    openDatePicker,
   };
 }

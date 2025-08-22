@@ -77,10 +77,8 @@ const parseDateAsLocal = (dateString: string) => {
 
 
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
-  const { addOrUpdateEntry, setSelectedEntryId } = useSwalathStore();
   const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
-  const [editingEntry, setEditingEntry] = useState<SwalathEntry | null>(null);
 
   const sortedEntries = useMemo(() => entries.sort((a, b) => parseDateAsLocal(a.id).getTime() - parseDateAsLocal(b.id).getTime()), [entries]);
 
@@ -170,26 +168,6 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
       setDeleteCandidate(null);
     }
   };
-  
-  const handleEdit = (entry: SwalathEntry) => {
-    setSelectedEntryId(entry.id);
-    setEditingEntry(entry);
-  };
-  
-  const handleSave = (entry: SwalathEntry) => {
-    addOrUpdateEntry(entry);
-    setEditingEntry(null);
-    setSelectedEntryId(null);
-  }
-
-  const handleEditSheetOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setEditingEntry(null);
-      setSelectedEntryId(null);
-    }
-  }
-
-  const entryDate = editingEntry?.id ? parseDateAsLocal(editingEntry.id) : new Date();
   
   const handleRangeChange = (newRange: Range) => {
     setRange(newRange);
@@ -294,7 +272,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => handleEdit(entry)}>
+                                            <DropdownMenuItem onClick={() => onEdit(entry)}>
                                                 <Pencil className="mr-2" /> Edit
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
@@ -329,25 +307,6 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <Sheet open={!!editingEntry} onOpenChange={handleEditSheetOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
-            <SheetHeader className="p-6 pb-2">
-                <SheetTitle className="text-2xl font-bold">Edit Entry</SheetTitle>
-                <SheetDescription>
-                  {format(entryDate, "EEEE, MMMM d, yyyy")}
-                </SheetDescription>
-            </SheetHeader>
-            <div className="flex-grow overflow-y-auto px-6">
-              <SwalathForm
-                  entry={editingEntry}
-                  selectedEntryId={editingEntry?.id ?? null}
-                  onSave={handleSave}
-                  onCancel={() => handleEditSheetOpenChange(false)}
-              />
-            </div>
-        </SheetContent>
-      </Sheet>
     </>
   );
 };

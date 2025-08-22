@@ -6,13 +6,20 @@ import { Header } from '@/components/header';
 import { HistoryView } from '@/components/history-view';
 import { HadithBanner } from '@/components/hadith-banner';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CalendarPlus, Plus } from 'lucide-react';
 
 export default function SwalathTrackerPage() {
-  const { entries, deleteEntry, setSelectedEntryId } = useSwalathStore();
+  const { entries, deleteEntry, setSelectedEntryId, openFormForDate, openDatePicker } = useSwalathStore();
   
   const handleDelete = (id: string) => {
     deleteEntry(id);
   };
+
+  const handleOpenForToday = () => {
+    const today = new Date().toISOString().split('T')[0];
+    openFormForDate(today);
+  }
   
   return (
     <main className="min-h-screen bg-background text-foreground font-body">
@@ -25,8 +32,20 @@ export default function SwalathTrackerPage() {
                     <CardDescription>A simple counter to track total Swalaths for the day.</CardDescription>
                 </CardHeader>
             </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button onClick={handleOpenForToday} size="lg" variant="outline">
+                    <Plus className="mr-2" />
+                    Add/Edit Today's Entry
+                </Button>
+                <Button onClick={openDatePicker} size="lg" variant="outline">
+                    <CalendarPlus className="mr-2" />
+                    Entry for Custom Date
+                </Button>
+            </div>
+
             <HadithBanner />
-            <HistoryView entries={entries} onEdit={(entry) => setSelectedEntryId(entry.id)} onDelete={handleDelete} />
+            <HistoryView entries={entries} onEdit={(entry) => openFormForDate(entry.id)} onDelete={handleDelete} />
         </div>
       </div>
     </main>

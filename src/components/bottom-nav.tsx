@@ -25,9 +25,18 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export const BottomNav = () => {
-  const { addOrUpdateEntry, getSelectedEntry, setSelectedEntryId, entries, selectedEntryId } = useSwalathStore();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isCustomDateSheetOpen, setIsCustomDateSheetOpen] = useState(false);
+  const { 
+    addOrUpdateEntry, 
+    getSelectedEntry, 
+    setSelectedEntryId, 
+    isFormSheetOpen,
+    setIsFormSheetOpen,
+    isDatePickerSheetOpen,
+    setIsDatePickerSheetOpen,
+    openFormForDate,
+    selectedEntryId 
+  } = useSwalathStore();
+  
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isClient, setIsClient] = useState(false);
@@ -39,38 +48,23 @@ export const BottomNav = () => {
 
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
-    setSelectedEntryId(null);
-    setIsSheetOpen(false);
-    setIsCustomDateSheetOpen(false);
+    setIsFormSheetOpen(false);
   }
 
-  const handleOpenFormForToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const todayEntry = entries.find(e => e.id === today);
-    setSelectedEntryId(today);
-    setIsSheetOpen(true);
-    setIsFabMenuOpen(false);
-  }
-  
-  const handleOpenChange = (isOpen: boolean) => {
+  const handleFormSheetOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setSelectedEntryId(null);
     }
-    setIsSheetOpen(isOpen);
+    setIsFormSheetOpen(isOpen);
   }
 
   const handleCustomDateSelect = (date: Date | undefined) => {
     if (!date) return;
     setSelectedDate(date);
     const formattedId = format(date, 'yyyy-MM-dd');
-    setSelectedEntryId(formattedId);
-    setIsCustomDateSheetOpen(false);
-    setTimeout(() => setIsSheetOpen(true), 100);
-  }
-
-  const handleOpenCustomDate = () => {
-    setIsCustomDateSheetOpen(true);
-    setIsFabMenuOpen(false);
+    setIsDatePickerSheetOpen(false);
+    // Use a timeout to ensure the sheet has time to close before the next one opens
+    setTimeout(() => openFormForDate(formattedId), 100);
   }
 
   if (!isClient) {
@@ -110,14 +104,6 @@ export const BottomNav = () => {
                   Swalath Counter
                 </Button>
               </Link>
-              <Button variant="ghost" onClick={handleOpenFormForToday} className="justify-start">
-                <Plus className="mr-2" />
-                Add Swalath for Today
-              </Button>
-              <Button variant="ghost" onClick={handleOpenCustomDate} className="justify-start">
-                <CalendarPlus className="mr-2" />
-                Swalath for Custom Date
-              </Button>
               <Link href="/settings" passHref>
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
                   <Settings className="mr-2" />
@@ -130,7 +116,7 @@ export const BottomNav = () => {
       </div>
       
       {/* Sheets for forms remain outside the main nav structure */}
-      <Sheet open={isCustomDateSheetOpen} onOpenChange={setIsCustomDateSheetOpen}>
+      <Sheet open={isDatePickerSheetOpen} onOpenChange={setIsDatePickerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl p-0">
             <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">Select a Date</SheetTitle>
@@ -150,11 +136,11 @@ export const BottomNav = () => {
         </SheetContent>
       </Sheet>
 
-      <Sheet open={isSheetOpen} onOpenChange={handleOpenChange}>
+      <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
         <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
           <SheetHeader className="p-6 pb-2">
             <SheetTitle className="text-2xl font-bold">
-              {entries.some(e => e.id === selectedEntryId) ? 'Edit Swalath Entry' : "New Swalath Entry"}
+              {selectedEntry ? 'Edit Swalath Entry' : "New Swalath Entry"}
             </SheetTitle>
             <SheetDescription>
               {format(entryDate, "EEEE, MMMM d, yyyy")}
@@ -166,8 +152,7 @@ export const BottomNav = () => {
               selectedEntryId={selectedEntryId}
               onSave={handleSave}
               onCancel={() => {
-                setSelectedEntryId(null);
-                setIsSheetOpen(false);
+                handleFormSheetOpenChange(false);
               }}
             />
           </div>
