@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { PrayerTracking, PrayerName, DailyPrayer } from '@/lib/types';
+import type { PrayerTracking, PrayerName, DailyPrayer, RawatibPrayers } from '@/lib/types';
 import { getCurrentPrayer } from '@/lib/prayer-times';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Sunrise, Sunset, Clock, Star } from 'lucide-react';
+import { Sun, Moon, Sunrise, Sunset, Clock, Star, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,8 +27,15 @@ const dailyPrayers: { id: keyof PrayerTracking; label: PrayerName, icon: React.E
   { id: 'isha', label: 'Isha', icon: Star },
 ];
 
+const rawatibPrayers: { id: keyof RawatibPrayers, label: string }[] = [
+    { id: 'beforeFajr', label: 'Before Fajr (2)' },
+    { id: 'beforeDhuhr', label: 'Before Dhuhr (4)' },
+    { id: 'afterDhuhr', label: 'After Dhuhr (2)' },
+    { id: 'afterMaghrib', label: 'After Maghrib (2)' },
+    { id: 'afterIsha', label: 'After Isha (2)' },
+]
+
 const voluntaryPrayers = [
-  { id: 'rawathib', label: 'Rawathib' },
   { id: 'tahajjud', label: 'Tahajjud' },
   { id: 'dhuha', label: 'Dhuha' },
   { id: 'witr', label: 'Witr' },
@@ -59,10 +66,18 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
         }
     };
     
-    const handleVoluntaryPrayerChange = (prayer: keyof PrayerTracking, checked: boolean) => {
+    const handleVoluntaryPrayerChange = (prayer: 'tahajjud' | 'dhuha' | 'witr', checked: boolean) => {
         onUpdate({
             ...prayerData,
             [prayer]: checked,
+        });
+    }
+    
+    const handleRawatibChange = (prayer: keyof RawatibPrayers, checked: boolean) => {
+        const newRawatib = { ...prayerData.rawathib, [prayer]: checked };
+        onUpdate({
+            ...prayerData,
+            rawathib: newRawatib,
         });
     }
 
@@ -137,15 +152,39 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
 
         <Card>
             <CardHeader>
-                <CardTitle>Voluntary Prayers</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                    <Heart className="text-pink-500" />
+                    Rawathib Prayers (Sunnah)
+                </CardTitle>
+                <CardDescription>The regular voluntary prayers linked to the five daily prayers.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {rawatibPrayers.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                        <Checkbox
+                            id={`rawathib-${item.id}`}
+                            checked={prayerData.rawathib[item.id]}
+                            onCheckedChange={(checked) => handleRawatibChange(item.id, !!checked)}
+                        />
+                        <Label htmlFor={`rawathib-${item.id}`} className="text-base">
+                            {item.label}
+                        </Label>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Other Voluntary Prayers</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 {voluntaryPrayers.map((item) => (
                 <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
                     <Checkbox
                         id={item.id}
-                        checked={!!prayerData[item.id as 'rawathib']}
-                        onCheckedChange={(checked) => handleVoluntaryPrayerChange(item.id as keyof PrayerTracking, !!checked)}
+                        checked={!!prayerData[item.id as 'tahajjud']}
+                        onCheckedChange={(checked) => handleVoluntaryPrayerChange(item.id as 'tahajjud' | 'dhuha' | 'witr', !!checked)}
                     />
                     <Label htmlFor={item.id} className="text-base">
                     {item.label}

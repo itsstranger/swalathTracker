@@ -17,13 +17,21 @@ export interface DailyPrayer {
   type: PrayerType;
 }
 
+export interface RawatibPrayers {
+  beforeFajr: boolean;
+  beforeDhuhr: boolean;
+  afterDhuhr: boolean;
+  afterMaghrib: boolean;
+  afterIsha: boolean;
+}
+
 export interface PrayerTracking {
   fajr: DailyPrayer;
   dhuhr: DailyPrayer;
   asr: DailyPrayer;
   maghrib: DailyPrayer;
   isha: DailyPrayer;
-  rawathib: boolean;
+  rawathib: RawatibPrayers;
   tahajjud: boolean;
   dhuha: boolean;
   witr: boolean;

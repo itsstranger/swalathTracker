@@ -2,10 +2,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { PrayerTracking, DailyPrayer } from '@/lib/types';
+import type { PrayerTracking } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import {
-  collection,
   doc,
   setDoc,
   onSnapshot,
@@ -21,7 +20,13 @@ const defaultPrayerState: PrayerTracking = {
     asr: { status: 'skipped', type: null },
     maghrib: { status: 'skipped', type: null },
     isha: { status: 'skipped', type: null },
-    rawathib: false,
+    rawathib: {
+      beforeFajr: false,
+      beforeDhuhr: false,
+      afterDhuhr: false,
+      afterMaghrib: false,
+      afterIsha: false,
+    },
     tahajjud: false,
     dhuha: false,
     witr: false,
@@ -38,6 +43,10 @@ export function usePrayerStore() {
     if (localData) {
         const parsed = JSON.parse(localData);
         if (parsed.id === todayId) {
+            // Basic migration for old rawathib structure
+            if (typeof parsed.data.rawathib === 'boolean') {
+              parsed.data.rawathib = defaultPrayerState.rawathib;
+            }
             return parsed.data;
         }
     }
@@ -53,9 +62,13 @@ export function usePrayerStore() {
       const docRef = doc(firestore, 'users', user.uid, 'prayers', todayId);
       unsubscribe = onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
-          setPrayerData(doc.data() as PrayerTracking);
+          const data = doc.data() as PrayerTracking;
+          // Basic migration for old rawathib structure from firestore
+          if (typeof data.rawathib === 'boolean') {
+            data.rawathib = defaultPrayerState.rawathib;
+          }
+          setPrayerData(data);
         } else {
-          // Check local storage before setting default
           const localData = getTodaysDataFromLocalStorage();
           setPrayerData(localData || defaultPrayerState);
         }
