@@ -43,6 +43,7 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Only check to open the modal after the store has been initialized.
     if (isInitialized && quranData && quranData.dailyGoalPages === 0) {
       setIsGoalModalOpen(true);
     }
