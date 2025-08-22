@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { QuranTracking } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { format } from 'date-fns';
 
@@ -43,18 +43,22 @@ export function useQuranStore() {
     let unsubscribe: (() => void) | undefined;
     
     if (user) {
-      const docRef = doc(firestore, 'users', user.uid, 'quran', todayId);
-      unsubscribe = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setQuranData(docSnap.data() as QuranTracking);
+      const todayDocRef = doc(firestore, 'users', user.uid, 'quran', todayId);
+      const userDocRef = doc(firestore, 'users', user.uid);
+
+      unsubscribe = onSnapshot(todayDocRef, async (todayDoc) => {
+        if (todayDoc.exists()) {
+          setQuranData(todayDoc.data() as QuranTracking);
         } else {
-          // Check for goal from previous days if it's a new day
-          const goalRef = doc(firestore, 'users', user.uid);
-          onSnapshot(goalRef, (userDoc) => {
-             const userData = userDoc.data();
-             const goal = userData?.quranGoal || 0;
-             setQuranData({ ...defaultQuranState, dailyGoalPages: goal });
-          });
+          // No entry for today, let's fetch the goal from the user's profile
+          try {
+            const userDoc = await getDoc(userDocRef);
+            const goal = userDoc.exists() ? userDoc.data()?.quranGoal || 0 : 0;
+            setQuranData({ ...defaultQuranState, dailyGoalPages: goal });
+          } catch (e) {
+            console.error("Failed to fetch user goal", e);
+            setQuranData(defaultQuranState);
+          }
         }
         setIsInitialized(true);
       }, (error) => {
@@ -92,7 +96,9 @@ export function useQuranStore() {
   }, [user, todayId, localDataKey]);
   
   const setDailyGoal = useCallback(async (pages: number) => {
-    const newQuranData = { ...quranData!, dailyGoalPages: pages };
+    if (!quranData) return;
+    
+    const newQuranData = { ...quranData, dailyGoalPages: pages };
     setQuranData(newQuranData);
 
     if (user) {
