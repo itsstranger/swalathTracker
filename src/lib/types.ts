@@ -9,12 +9,20 @@ export interface SwalathEntry {
   total: number;
 }
 
+export type PrayerStatus = 'prayed' | 'missed' | 'skipped';
+export type PrayerType = 'ada' | 'qaza' | null;
+
+export interface DailyPrayer {
+  status: PrayerStatus;
+  type: PrayerType;
+}
+
 export interface PrayerTracking {
-  fajr: boolean;
-  dhuhr: boolean;
-  asr: boolean;
-  maghrib: boolean;
-  isha: boolean;
+  fajr: DailyPrayer;
+  dhuhr: DailyPrayer;
+  asr: DailyPrayer;
+  maghrib: DailyPrayer;
+  isha: DailyPrayer;
   rawathib: boolean;
   tahajjud: boolean;
   dhuha: boolean;
