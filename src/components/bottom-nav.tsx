@@ -23,28 +23,36 @@ import { format } from 'date-fns';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
 
 export const BottomNav = () => {
+  const isFormSheetOpen = useSwalathStore((state) => state.isFormSheetOpen);
+  const isDatePickerSheetOpen = useSwalathStore((state) => state.isDatePickerSheetOpen);
+  const selectedEntryId = useSwalathStore((state) => state.selectedEntryId);
   const { 
     addOrUpdateEntry, 
     getSelectedEntry, 
-    setSelectedEntryId, 
-    isFormSheetOpen,
-    setIsFormSheetOpen,
-    isDatePickerSheetOpen,
-    setIsDatePickerSheetOpen,
+    setIsFormSheetOpen, 
     openFormForDate,
-    selectedEntryId 
-  } = useSwalathStore();
-  
-  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [isClient, setIsClient] = useState(false);
+    initialize
+  } = useSwalathStore((state) => state.actions);
+
+  const setDatePickerSheetOpen = (isOpen: boolean) => {
+    if (!isOpen) {
+      useSwalathStore.setState({ isDatePickerSheetOpen: false });
+    }
+  }
+
+  const { user, loading } = useAuth();
   
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const unsubscribe = initialize(user, loading);
+    return () => unsubscribe?.();
+  }, [user, loading, initialize]);
 
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
   const selectedEntry = getSelectedEntry();
 
   const handleSave = (entry: SwalathEntry) => {
@@ -52,24 +60,12 @@ export const BottomNav = () => {
     setIsFormSheetOpen(false);
   }
 
-  const handleFormSheetOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setSelectedEntryId(null);
-    }
-    setIsFormSheetOpen(isOpen);
-  }
-
   const handleCustomDateSelect = (date: Date | undefined) => {
     if (!date) return;
     setSelectedDate(date);
     const formattedId = format(date, 'yyyy-MM-dd');
-    setIsDatePickerSheetOpen(false);
-    // Use a timeout to ensure the sheet has time to close before the next one opens
+    useSwalathStore.setState({ isDatePickerSheetOpen: false });
     setTimeout(() => openFormForDate(formattedId), 100);
-  }
-
-  if (!isClient) {
-    return null; 
   }
 
   const parseDateAsLocal = (dateString: string) => {
@@ -134,8 +130,7 @@ export const BottomNav = () => {
         </Popover>
       </div>
       
-      {/* Sheets for forms remain outside the main nav structure */}
-      <Sheet open={isDatePickerSheetOpen} onOpenChange={setIsDatePickerSheetOpen}>
+      <Sheet open={isDatePickerSheetOpen} onOpenChange={setDatePickerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl p-0">
             <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="text-2xl font-bold">Select a Date</SheetTitle>
@@ -155,7 +150,7 @@ export const BottomNav = () => {
         </SheetContent>
       </Sheet>
 
-      <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
+      <Sheet open={isFormSheetOpen} onOpenChange={setIsFormSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
           <SheetHeader className="p-6 pb-2">
             <SheetTitle className="text-2xl font-bold">
@@ -171,7 +166,7 @@ export const BottomNav = () => {
               selectedEntryId={selectedEntryId}
               onSave={handleSave}
               onCancel={() => {
-                handleFormSheetOpenChange(false);
+                setIsFormSheetOpen(false);
               }}
             />
           </div>

@@ -1,7 +1,7 @@
-
 // src/app/swalath/page.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import { Header } from '@/components/header';
 import { HistoryView } from '@/components/history-view';
@@ -9,10 +9,18 @@ import { HadithBanner } from '@/components/hadith-banner';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarPlus, Plus } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function SwalathTrackerPage() {
-  const { entries, deleteEntry, setSelectedEntryId, openFormForDate, openDatePicker } = useSwalathStore();
+  const entries = useSwalathStore((state) => state.entries);
+  const { openFormForDate, openDatePicker, deleteEntry, initialize } = useSwalathStore((state) => state.actions);
+  const { user, loading } = useAuth();
   
+  useEffect(() => {
+    const unsubscribe = initialize(user, loading);
+    return () => unsubscribe?.();
+  }, [user, loading, initialize]);
+
   const handleDelete = (id: string) => {
     deleteEntry(id);
   };
