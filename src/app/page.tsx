@@ -52,22 +52,24 @@ export default function Home() {
             </CardHeader>
           </Card>
           
-          <div className="flex flex-col items-center gap-4">
-            {dashboardItems.map((item) => (
-              <Link href={item.link} key={item.title} passHref className="w-3/4">
-                <Card className="hover:bg-muted/50 transition-colors h-full w-full">
-                  <CardHeader className="flex flex-row items-center gap-4">
-                    {item.icon}
-                    <div>
-                      <CardTitle>{item.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="flex justify-center">
+            <div className="grid w-full md:w-3/4 grid-cols-1 md:grid-cols-2 gap-4">
+              {dashboardItems.map((item) => (
+                <Link href={item.link} key={item.title} passHref>
+                  <Card className="hover:bg-muted/50 transition-colors h-full w-full">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                      {item.icon}
+                      <div>
+                        <CardTitle>{item.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </div>
 
           <DailyInsight entry={todaysEntry} />
