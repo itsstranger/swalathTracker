@@ -11,6 +11,7 @@ export interface SwalathEntry {
 
 export type PrayerStatus = 'prayed' | 'missed' | 'skipped';
 export type PrayerType = 'ada' | 'qaza' | null;
+export type PrayerName = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
 
 export interface DailyPrayer {
   status: PrayerStatus;
@@ -40,12 +41,15 @@ export interface PrayerTracking {
 }
 
 export interface QuranTracking {
-  hizbJuz: string; // e.g., "1 Juz", "2 Hizb"
-  yasin: boolean;
-  mulk: boolean;
-  waqia: boolean;
-  rahman: boolean;
-  kahf: boolean;
+  dailyGoalPages: number;
+  pagesRead: number;
+  surahs: {
+    yasin: boolean;
+    mulk: boolean;
+    waqia: boolean;
+    rahman: boolean;
+    kahf: boolean;
+  };
 }
 
 export interface DuaTracking {
