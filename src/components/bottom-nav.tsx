@@ -40,11 +40,12 @@ export const BottomNav = () => {
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isClient, setIsClient] = useState(false);
-  const selectedEntry = getSelectedEntry();
   
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const selectedEntry = getSelectedEntry();
 
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
