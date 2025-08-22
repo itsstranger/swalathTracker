@@ -1,40 +1,77 @@
+// src/app/page.tsx
 'use client';
 
 import { Header } from '@/components/header';
-import { PrayersTracker } from '@/components/trackers/prayers-tracker';
-import { QuranTracker } from '@/components/trackers/quran-tracker';
-import { DuaTracker } from '@/components/trackers/dua-tracker';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { BookOpen, Moon, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { DailyInsight } from '@/components/daily-insight';
+import { useSwalathStore } from '@/hooks/use-swalath-store';
 
 export default function Home() {
-  const isFriday = new Date().getDay() === 5;
+  const { entries } = useSwalathStore();
+  const today = new Date().toISOString().split('T')[0];
+  const todaysEntry = entries.find(e => e.id === today) || null;
+
+  const dashboardItems = [
+    {
+      title: 'Prayers',
+      description: 'Track your daily obligatory and voluntary prayers.',
+      icon: <ShieldCheck className="w-8 h-8 text-primary" />,
+      link: '/prayers'
+    },
+    {
+      title: 'Quran',
+      description: 'Log your daily Quran recitation and special Surahs.',
+      icon: <BookOpen className="w-8 h-8 text-primary" />,
+      link: '/quran'
+    },
+    {
+      title: 'Duas',
+      description: 'Mark your daily Duas and supplications.',
+      icon: <Moon className="w-8 h-8 text-primary" />,
+      link: '/duas'
+    }
+  ];
 
   return (
     <main className="min-h-screen bg-background text-foreground font-body">
       <div className="container mx-auto p-4 md:p-6">
         <Header />
         <div className="mt-6 space-y-6">
-          <PrayersTracker />
-          <QuranTracker isFriday={isFriday} />
-          <DuaTracker />
-
-          <Card>
+          <Card className="bg-primary/5">
             <CardHeader>
-              <CardTitle>Daily Reflections</CardTitle>
-              <CardDescription>Add any notes or reflections for the day.</CardDescription>
+              <CardTitle className="text-2xl font-bold font-headline">Dashboard</CardTitle>
+              <CardDescription>Your central hub for daily worship tracking.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Textarea placeholder="Write your thoughts here..." />
-            </CardContent>
           </Card>
           
-          <Button className="w-full" size="lg">
-            <Save className="mr-2" />
-            Save Today's Entry
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {dashboardItems.map((item) => (
+              <Link href={item.link} key={item.title} passHref>
+                <Card className="hover:bg-muted/50 transition-colors h-full">
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    {item.icon}
+                    <div>
+                      <CardTitle>{item.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <DailyInsight entry={todaysEntry} />
+
+          <Link href="/swalath" passHref>
+            <Button className="w-full" size="lg" variant="outline">
+              Go to Swalath Counter
+            </Button>
+          </Link>
         </div>
       </div>
     </main>

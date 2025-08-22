@@ -9,7 +9,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import {
   Popover,
@@ -47,6 +46,7 @@ export const BottomNav = () => {
 
   const handleOpenFormForToday = () => {
     const today = new Date().toISOString().split('T')[0];
+    const todayEntry = entries.find(e => e.id === today);
     setSelectedEntryId(today);
     setIsSheetOpen(true);
     setIsFabMenuOpen(false);
@@ -112,11 +112,11 @@ export const BottomNav = () => {
               </Link>
               <Button variant="ghost" onClick={handleOpenFormForToday} className="justify-start">
                 <Plus className="mr-2" />
-                New Swalath Entry
+                Add Swalath for Today
               </Button>
               <Button variant="ghost" onClick={handleOpenCustomDate} className="justify-start">
                 <CalendarPlus className="mr-2" />
-                Swalath Custom Date
+                Swalath for Custom Date
               </Button>
               <Link href="/settings" passHref>
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
@@ -154,7 +154,7 @@ export const BottomNav = () => {
         <SheetContent side="bottom" className="rounded-t-2xl h-[90vh] flex flex-col p-0">
           <SheetHeader className="p-6 pb-2">
             <SheetTitle className="text-2xl font-bold">
-              {entries.some(e => e.id === selectedEntry?.id) ? 'Edit Swalath Entry' : "New Swalath Entry"}
+              {entries.some(e => e.id === selectedEntryId) ? 'Edit Swalath Entry' : "New Swalath Entry"}
             </SheetTitle>
             <SheetDescription>
               {format(entryDate, "EEEE, MMMM d, yyyy")}
