@@ -1,7 +1,7 @@
 
 'use client';
 
-import { CalendarPlus, Plus, Settings, Home, Menu, Bot } from 'lucide-react';
+import { Settings, Home, Menu, Bot, ShieldCheck, BookOpen, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -96,6 +96,24 @@ export const BottomNav = () => {
                 <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
                   <Home className="mr-2" />
                   Dashboard
+                </Button>
+              </Link>
+               <Link href="/prayers" passHref>
+                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
+                  <ShieldCheck className="mr-2" />
+                  Prayers
+                </Button>
+              </Link>
+               <Link href="/quran" passHref>
+                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
+                  <BookOpen className="mr-2" />
+                  Quran
+                </Button>
+              </Link>
+               <Link href="/duas" passHref>
+                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
+                  <Moon className="mr-2" />
+                  Duas
                 </Button>
               </Link>
               <Link href="/swalath" passHref>
