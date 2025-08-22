@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Sun, Moon, Sunrise, Sunset, Clock, Star, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
 
 interface PrayersTrackerProps {
   prayerData: PrayerTracking;
@@ -67,10 +68,10 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
         }
     };
     
-    const handleVoluntaryPrayerChange = (prayer: 'tahajjud' | 'dhuha' | 'witr', checked: boolean) => {
+    const handleVoluntaryPrayerChange = (prayer: 'tahajjud' | 'dhuha' | 'witr', count: number) => {
         onUpdate({
             ...prayerData,
-            [prayer]: checked,
+            [prayer]: count,
         });
     }
     
@@ -179,18 +180,28 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
             <CardHeader>
                 <CardTitle>Other Voluntary Prayers</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-4">
                 {voluntaryPrayers.map((item) => (
-                <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
-                    <Checkbox
-                        id={item.id}
-                        checked={!!prayerData[item.id as 'tahajjud']}
-                        onCheckedChange={(checked) => handleVoluntaryPrayerChange(item.id as 'tahajjud' | 'dhuha' | 'witr', !!checked)}
-                    />
-                    <Label htmlFor={item.id} className="text-base">
-                    {item.label}
-                    </Label>
-                </div>
+                    <div key={item.id} className="flex items-center justify-between p-2 rounded-md">
+                        <Label htmlFor={item.id} className="text-base">
+                            {item.label}
+                        </Label>
+                        <Input
+                            id={item.id}
+                            type="number"
+                            min="0"
+                            placeholder="Raka'hs"
+                            className="w-28"
+                            value={prayerData[item.id as 'tahajjud'] || ''}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                handleVoluntaryPrayerChange(
+                                    item.id as 'tahajjud' | 'dhuha' | 'witr',
+                                    value === '' ? 0 : parseInt(value, 10)
+                                );
+                            }}
+                        />
+                    </div>
                 ))}
             </CardContent>
         </Card>

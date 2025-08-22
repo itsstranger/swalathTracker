@@ -28,9 +28,9 @@ const defaultPrayerState: PrayerTracking = {
       beforeIsha: false,
       afterIsha: false,
     },
-    tahajjud: false,
-    dhuha: false,
-    witr: false,
+    tahajjud: 0,
+    dhuha: 0,
+    witr: 0,
 };
 
 export function usePrayerStore() {
@@ -44,11 +44,17 @@ export function usePrayerStore() {
     if (localData) {
         const parsed = JSON.parse(localData);
         if (parsed.id === todayId) {
+            let data = parsed.data;
             // Basic migration for old rawathib structure
-            if (typeof parsed.data.rawathib === 'boolean' || !('beforeIsha' in parsed.data.rawathib)) {
-              parsed.data.rawathib = defaultPrayerState.rawathib;
+            if (typeof data.rawathib === 'boolean' || !('beforeIsha' in data.rawathib)) {
+              data.rawathib = defaultPrayerState.rawathib;
             }
-            return parsed.data;
+            if (typeof data.tahajjud === 'boolean') {
+                data.tahajjud = 0;
+                data.dhuha = 0;
+                data.witr = 0;
+            }
+            return data;
         }
     }
     return null;
@@ -67,6 +73,11 @@ export function usePrayerStore() {
           // Basic migration for old rawathib structure from firestore
           if (typeof data.rawathib === 'boolean' || !('beforeIsha' in data.rawathib)) {
             data.rawathib = defaultPrayerState.rawathib;
+          }
+          if (typeof data.tahajjud === 'boolean') {
+              data.tahajjud = 0;
+              data.dhuha = 0;
+              data.witr = 0;
           }
           setPrayerData(data);
         } else {

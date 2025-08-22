@@ -33,9 +33,9 @@ export interface PrayerTracking {
   maghrib: DailyPrayer;
   isha: DailyPrayer;
   rawathib: RawatibPrayers;
-  tahajjud: boolean;
-  dhuha: boolean;
-  witr: boolean;
+  tahajjud: number;
+  dhuha: number;
+  witr: number;
 }
 
 export interface QuranTracking {
