@@ -154,9 +154,9 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Heart className="text-pink-500" />
-                    Rawathib Prayers (Sunnah)
+                    Rawatib Prayers (Sunnah Mu'akkadah)
                 </CardTitle>
-                <CardDescription>The regular voluntary prayers linked to the five daily prayers.</CardDescription>
+                <CardDescription>The 12 confirmed voluntary prayers linked to the five daily prayers.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {rawatibPrayers.map((item) => (
