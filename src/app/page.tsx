@@ -2,7 +2,7 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DailyInsight } from '@/components/daily-insight';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import { usePrayerTracker } from '@/hooks/use-prayer-store';
@@ -12,7 +12,6 @@ import { TodaysProgress } from '@/components/todays-progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Moon, ShieldCheck, Bot } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 
 export default function Home() {
@@ -48,13 +47,6 @@ export default function Home() {
         <div className="mt-6 flex justify-center">
             <div className="w-full md:w-3/4 space-y-6">
               
-              <Card className="bg-primary/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold font-headline">Dashboard</CardTitle>
-                  <CardDescription>Your central hub for daily worship tracking.</CardDescription>
-                </CardHeader>
-              </Card>
-
               {isDataReady ? (
                 <TodaysProgress 
                   prayerData={prayerData}
