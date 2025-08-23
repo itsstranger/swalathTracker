@@ -89,13 +89,15 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
     }
 
     const currentPrayerInfo = dailyPrayersConfig.find(p => p.label === currentPrayer);
+    const isCurrentPrayerPrayed = currentPrayerInfo ? (prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' : true;
+
     const dailyPrayers = isFriday 
         ? dailyPrayersConfig.map(p => p.id === 'dhuhr' ? { ...p, label: 'Jumu\'ah' as PrayerName } : p)
         : dailyPrayersConfig;
 
   return (
     <div className="space-y-6">
-        {currentPrayerInfo && (
+        {currentPrayerInfo && !isCurrentPrayerPrayed && (
             <Card className="bg-primary/5 border-primary/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
@@ -111,10 +113,9 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
                      <Button 
                         size="lg"
                         className="w-full"
-                        variant={(prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' ? 'secondary' : 'default'}
-                        onClick={() => handleDailyPrayerChange(currentPrayerInfo.id, (prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status !== 'prayed')}
+                        onClick={() => handleDailyPrayerChange(currentPrayerInfo.id, true)}
                     >
-                        {(prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' ? `Undo ${isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}` : `I have prayed ${isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}`}
+                        I have prayed {isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}
                     </Button>
                 </CardContent>
             </Card>
