@@ -127,7 +127,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
             {dailyPrayers.map((item) => {
                 const prayer = prayerData[item.id as 'fajr'] as DailyPrayer;
                 return (
-                    <div key={item.id} className={cn("p-4 rounded-lg transition-colors", prayer.status === 'prayed' ? 'bg-green-50' : 'bg-muted/30')}>
+                    <div key={item.id} className={cn("p-4 rounded-lg transition-colors", prayer.status === 'prayed' ? 'bg-green-500/10' : 'bg-muted/30')}>
                         <div className="flex items-center justify-between">
                             <Label htmlFor={item.id} className="text-base font-medium flex items-center gap-2">
                                 <item.icon className={cn("w-5 h-5", prayer.status === 'prayed' ? 'text-primary' : 'text-muted-foreground')} />
