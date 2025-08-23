@@ -2,7 +2,7 @@
 'use client';
 
 import type { FC } from 'react';
-import { Bell, Cog, LogIn, LogOut, User } from 'lucide-react';
+import { Cog, LogIn, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
+import { Notifications } from './notifications';
 
 export const Header: FC = () => {
   const { user, loading, logout } = useAuth();
@@ -34,10 +35,7 @@ export const Header: FC = () => {
       </Link>
       
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-6 w-6" />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <Notifications />
 
         {loading ? (
           <Skeleton className="h-10 w-10 rounded-full" />
