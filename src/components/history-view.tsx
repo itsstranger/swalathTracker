@@ -171,113 +171,114 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                     <TabsTrigger value="year">Year</TabsTrigger>
                 </TabsList>
             </div>
-            
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="bg-card/50">
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                           <Sigma className="w-4 h-4" /> Total Swalaths
-                        </CardTitle>
-                        <p className="text-2xl font-bold">{totalSwalaths.toLocaleString()}</p>
-                    </CardHeader>
-                </Card>
-                <Card className="bg-card/50">
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                           <TrendingUp className="w-4 h-4" /> Avg Per Day
-                        </CardTitle>
-                        <p className="text-2xl font-bold">{averagePerDay.toLocaleString()}</p>
-                    </CardHeader>
-                </Card>
-                <Card className="bg-card/50 col-span-2 lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                           <CalendarDays className="w-4 h-4" /> Days Tracked
-                        </CardTitle>
-                        <p className="text-2xl font-bold">{daysTracked} / {totalDaysInRange}</p>
-                    </CardHeader>
-                </Card>
-            </div>
+            <TabsContent value={range} className="space-y-6 mt-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Card className="bg-card/50">
+                      <CardHeader>
+                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Sigma className="w-4 h-4" /> Total Swalaths
+                          </CardTitle>
+                          <p className="text-2xl font-bold">{totalSwalaths.toLocaleString()}</p>
+                      </CardHeader>
+                  </Card>
+                  <Card className="bg-card/50">
+                      <CardHeader>
+                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" /> Avg Per Day
+                          </CardTitle>
+                          <p className="text-2xl font-bold">{averagePerDay.toLocaleString()}</p>
+                      </CardHeader>
+                  </Card>
+                  <Card className="bg-card/50 col-span-2 lg:col-span-1">
+                      <CardHeader>
+                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <CalendarDays className="w-4 h-4" /> Days Tracked
+                          </CardTitle>
+                          <p className="text-2xl font-bold">{daysTracked} / {totalDaysInRange}</p>
+                      </CardHeader>
+                  </Card>
+              </div>
 
-            <Card className="bg-card/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BarChart className="w-5 h-5" />
-                        Activity
-                    </CardTitle>
-                    <CardDescription>{dateRangeLabel}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {chartData.length > 0 && chartData.some(d => d.total > 0) ? (
-                        <ChartContainer config={chartConfig} className="h-48 w-full">
-                            <RechartsBarChart data={chartData} margin={{ top: 5, right: 0, bottom: 0, left: 0 }}>
-                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                            <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} width={30} />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent indicator="dot" />}
-                            />
-                            <Bar 
-                                dataKey="total"
-                                radius={8}
-                                barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
-                            >
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.total > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))'} opacity={entry.total > 0 ? 1 : 0.2} />
-                                ))}
-                            </Bar>
-                            </RechartsBarChart>
-                        </ChartContainer>
-                    ) : (
-                        <div className="flex items-center justify-center h-[208px] border-2 border-dashed rounded-lg">
-                            <p className="text-muted-foreground">No chart data for this period.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+              <Card className="bg-card/50">
+                  <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                          <BarChart className="w-5 h-5" />
+                          Activity
+                      </CardTitle>
+                      <CardDescription>{dateRangeLabel}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      {chartData.length > 0 && chartData.some(d => d.total > 0) ? (
+                          <ChartContainer config={chartConfig} className="h-48 w-full">
+                              <RechartsBarChart data={chartData} margin={{ top: 5, right: 0, bottom: 0, left: 0 }}>
+                              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                              <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} width={30} />
+                              <ChartTooltip
+                                  cursor={false}
+                                  content={<ChartTooltipContent indicator="dot" />}
+                              />
+                              <Bar 
+                                  dataKey="total"
+                                  radius={8}
+                                  barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
+                              >
+                                  {chartData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.total > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))'} opacity={entry.total > 0 ? 1 : 0.2} />
+                                  ))}
+                              </Bar>
+                              </RechartsBarChart>
+                          </ChartContainer>
+                      ) : (
+                          <div className="flex items-center justify-center h-[208px] border-2 border-dashed rounded-lg">
+                              <p className="text-muted-foreground">No chart data for this period.</p>
+                          </div>
+                      )}
+                  </CardContent>
+              </Card>
 
-            <Card className="bg-card/50">
-                <CardHeader>
-                    <CardTitle className="text-lg">Logs</CardTitle>
-                    <CardDescription>Detailed entries for the selected period.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {filteredEntries.length > 0 ? (
-                        <div className="space-y-1">
-                            {filteredEntries.slice().reverse().map(entry => (
-                                <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50")}>
-                                    <div>
-                                        <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
-                                        <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-bold text-lg">{entry.total}</p>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuItem onClick={() => onEdit(entry)}>
-                                                    <Pencil className="mr-2" /> Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
-                                                    <Trash2 className="mr-2" /> Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
-                            <p className="text-muted-foreground">No entries for this period.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+              <Card className="bg-card/50">
+                  <CardHeader>
+                      <CardTitle className="text-lg">Logs</CardTitle>
+                      <CardDescription>Detailed entries for the selected period.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      {filteredEntries.length > 0 ? (
+                          <div className="space-y-1">
+                              {filteredEntries.slice().reverse().map(entry => (
+                                  <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50")}>
+                                      <div>
+                                          <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
+                                          <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                          <p className="font-bold text-lg">{entry.total}</p>
+                                          <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                                                      <MoreHorizontal className="h-4 w-4" />
+                                                  </Button>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent>
+                                                  <DropdownMenuItem onClick={() => onEdit(entry)}>
+                                                      <Pencil className="mr-2" /> Edit
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
+                                                      <Trash2 className="mr-2" /> Delete
+                                                  </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                          </DropdownMenu>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      ) : (
+                          <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
+                              <p className="text-muted-foreground">No entries for this period.</p>
+                          </div>
+                      )}
+                  </CardContent>
+              </Card>
+            </TabsContent>
         </Tabs>
       </div>
       
