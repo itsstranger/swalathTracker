@@ -7,9 +7,15 @@ import { PrayersTracker } from '@/components/trackers/prayers-tracker';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePrayerTracker } from '@/hooks/use-prayer-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 export default function PrayersPage() {
     const { prayerData, updatePrayerData, isInitialized } = usePrayerTracker();
+    const [isFriday, setIsFriday] = useState(false);
+
+    useEffect(() => {
+        setIsFriday(new Date().getDay() === 5);
+    }, []);
     
     return (
         <main className="min-h-screen bg-background text-foreground font-body">
@@ -25,7 +31,7 @@ export default function PrayersPage() {
                         </Card>
                         
                         {isInitialized && prayerData ? (
-                            <PrayersTracker prayerData={prayerData} onUpdate={updatePrayerData} />
+                            <PrayersTracker prayerData={prayerData} onUpdate={updatePrayerData} isFriday={isFriday} />
                         ) : (
                             <div className="space-y-6">
                                 <Skeleton className="h-48 w-full" />

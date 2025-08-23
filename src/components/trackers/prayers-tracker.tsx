@@ -1,3 +1,4 @@
+
 // src/components/trackers/prayers-tracker.tsx
 'use client';
 
@@ -20,6 +21,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 interface PrayersTrackerProps {
   prayerData: PrayerTracking;
   onUpdate: (data: PrayerTracking) => void;
+  isFriday: boolean;
 }
 
 const dailyPrayersConfig: { id: keyof PrayerTracking; label: PrayerName, icon: React.ElementType }[] = [
@@ -46,15 +48,13 @@ const voluntaryPrayers = [
   { id: 'witr', label: 'Witr', max: 11, step: 2, min: 1 },
 ];
 
-export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }) => {
+export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, isFriday }) => {
     const { timings, status, error, requestLocation } = usePrayerTimes();
     const [currentPrayer, setCurrentPrayer] = useState<PrayerName>('Isha');
-    const [isFriday, setIsFriday] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
         setCurrentPrayer(getCurrentPrayer(timings));
-        setIsFriday(new Date().getDay() === 5);
     }, [timings]);
 
     const handleDailyPrayerChange = (prayer: keyof PrayerTracking, prayed: boolean) => {

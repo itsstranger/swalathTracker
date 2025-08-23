@@ -7,10 +7,15 @@ import { QuranTracker } from '@/components/trackers/quran-tracker';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuranTracker } from '@/hooks/use-quran-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 export default function QuranPage() {
     const { isInitialized } = useQuranTracker();
-    const isFriday = new Date().getDay() === 5;
+    const [isFriday, setIsFriday] = useState(false);
+
+    useEffect(() => {
+        setIsFriday(new Date().getDay() === 5);
+    }, []);
 
     return (
         <main className="min-h-screen bg-background text-foreground font-body">

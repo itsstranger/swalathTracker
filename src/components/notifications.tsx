@@ -1,7 +1,8 @@
+
 // src/components/notifications.tsx
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Bell, CheckCircle2, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +29,11 @@ export const Notifications = () => {
   const { prayerData } = usePrayerTracker();
   const { quranData } = useQuranTracker();
   const { timings } = usePrayerTimes();
-  const isFriday = new Date().getDay() === 5;
+  const [isFriday, setIsFriday] = useState(false);
+
+  useEffect(() => {
+    setIsFriday(new Date().getDay() === 5);
+  }, []);
 
   const notifications = useMemo(() => {
     const newNotifications: Notification[] = [];
