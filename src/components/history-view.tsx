@@ -3,8 +3,8 @@
 
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
-import { BarChart, MoreHorizontal, Pencil, Percent, Sigma, Trash2 } from 'lucide-react';
-import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, endOfMonth, isToday } from 'date-fns';
+import { BarChart, CalendarDays, MoreHorizontal, Pencil, Sigma, Trash2, TrendingUp } from 'lucide-react';
+import { format, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, isToday, differenceInDays, subDays } from 'date-fns';
 
 import {
   Card,
@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart as RechartsBarChart, XAxis, Cell } from 'recharts';
+import { Bar, BarChart as RechartsBarChart, XAxis, Cell, YAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import type { SwalathEntry } from '@/lib/types';
 import {
@@ -38,16 +38,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from './ui/badge';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
-import { SwalathForm } from './swalath-form';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface HistoryViewProps {
   entries: SwalathEntry[];
@@ -60,7 +52,7 @@ type Range = 'week' | 'month' | 'year';
 const chartConfig = {
   total: {
     label: 'Total Swalaths',
-    color: 'hsl(var(--chart-2))',
+    color: 'hsl(var(--chart-1))',
   },
   active: {
     label: 'Active Day',
@@ -74,27 +66,30 @@ const parseDateAsLocal = (dateString: string) => {
     return new Date(year, month - 1, day);
 };
 
-
 export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete }) => {
   const [range, setRange] = useState<Range>('week');
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
 
   const sortedEntries = useMemo(() => entries.sort((a, b) => parseDateAsLocal(a.id).getTime() - parseDateAsLocal(b.id).getTime()), [entries]);
 
-  const { filteredEntries, dateRangeLabel } = useMemo(() => {
+  const { filteredEntries, dateRangeLabel, totalDaysInRange } = useMemo(() => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
     let startDate: Date;
+    let days = 7;
 
     switch (range) {
         case 'week':
             startDate = subDays(now, 6);
+            days = 7;
             break;
         case 'month':
             startDate = subDays(now, 29);
+            days = 30;
             break;
         case 'year':
             startDate = subMonths(now, 11);
+            days = differenceInDays(now, startDate) + 1;
             break;
         default:
             startDate = subDays(now, 6);
@@ -113,24 +108,20 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
       label = `${format(startDate, 'd MMM')} - ${format(now, 'd MMM yyyy')}`;
     }
 
-    return { filteredEntries: relevantEntries, dateRangeLabel: label };
+    return { filteredEntries: relevantEntries, dateRangeLabel: label, totalDaysInRange: days };
   }, [sortedEntries, range]);
 
   
   const totalSwalaths = useMemo(() => filteredEntries.reduce((acc, e) => acc + e.total, 0), [filteredEntries]);
-  const averageCompletion = useMemo(() => {
-    if (filteredEntries.length === 0) return 0;
-    const maxPossible = filteredEntries.length * 1000; // Assuming a high number is "full completion"
-    return maxPossible > 0 ? Math.round((totalSwalaths / maxPossible) * 100) : 0;
-  }, [totalSwalaths, filteredEntries.length]);
-
+  const daysTracked = useMemo(() => filteredEntries.length, [filteredEntries]);
+  const averagePerDay = useMemo(() => (daysTracked > 0 ? Math.round(totalSwalaths / daysTracked) : 0), [totalSwalaths, daysTracked]);
 
   const chartData = useMemo(() => {
     const now = new Date();
     const entriesById = new Map(entries.map(e => [e.id, e.total]));
 
     if (range === 'year') {
-        const yearInterval = { start: subMonths(startOfMonth(now), 11), end: now };
+        const yearInterval = { start: subMonths(now, 11), end: now };
         const months = eachMonthOfInterval(yearInterval);
         
         return months.map(monthStart => {
@@ -154,7 +145,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
     return allDays.map(day => {
         const formattedDate = format(day, 'yyyy-MM-dd');
         return {
-            date: format(day, 'dd MMM'),
+            date: range === 'week' ? format(day, 'eee') : format(day, 'dd'),
             total: entriesById.get(formattedDate) || 0,
             isToday: isToday(day),
         };
@@ -167,129 +158,127 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
       setDeleteCandidate(null);
     }
   };
-  
-  const handleRangeChange = (newRange: Range) => {
-    setRange(newRange);
-  };
 
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">History & Stats</h2>
-            <div className="flex items-center gap-2">
-                <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('week')} className="rounded-full">Week</Button>
-                <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('month')} className="rounded-full">Month</Button>
-                <Button variant={range === 'year' ? 'default' : 'ghost'} size="sm" onClick={() => handleRangeChange('year')} className="rounded-full">Year</Button>
+        <Tabs value={range} onValueChange={(value) => setRange(value as Range)}>
+            <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold font-headline">History & Stats</h2>
+                <TabsList>
+                    <TabsTrigger value="week">Week</TabsTrigger>
+                    <TabsTrigger value="month">Month</TabsTrigger>
+                    <TabsTrigger value="year">Year</TabsTrigger>
+                </TabsList>
             </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Total Count Section */}
-            <Card className="rounded-xl shadow-sm lg:col-span-1">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
-                        <Sigma className="w-4 h-4" />
-                        Total
+            
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card className="bg-card/50">
+                    <CardHeader>
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <Sigma className="w-4 h-4" /> Total Swalaths
+                        </CardTitle>
+                        <p className="text-2xl font-bold">{totalSwalaths.toLocaleString()}</p>
+                    </CardHeader>
+                </Card>
+                <Card className="bg-card/50">
+                    <CardHeader>
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <TrendingUp className="w-4 h-4" /> Avg Per Day
+                        </CardTitle>
+                        <p className="text-2xl font-bold">{averagePerDay.toLocaleString()}</p>
+                    </CardHeader>
+                </Card>
+                <Card className="bg-card/50 col-span-2 lg:col-span-1">
+                    <CardHeader>
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                           <CalendarDays className="w-4 h-4" /> Days Tracked
+                        </CardTitle>
+                        <p className="text-2xl font-bold">{daysTracked} / {totalDaysInRange}</p>
+                    </CardHeader>
+                </Card>
+            </div>
+
+            <Card className="bg-card/50">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BarChart className="w-5 h-5" />
+                        Activity
                     </CardTitle>
-                    <p className="text-4xl font-bold">{totalSwalaths}</p>
+                    <CardDescription>{dateRangeLabel}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-xs text-muted-foreground">Total for {dateRangeLabel}.</p>
-                </CardContent>
-            </Card>
-
-            {/* Statistics Section */}
-            <Card className="rounded-xl shadow-sm lg:col-span-3">
-                 <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
-                        <BarChart className="w-4 h-4" />
-                        Statistics
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {chartData.length > 0 ? (
-                        <>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center text-2xl font-bold">
-                                    <Percent className="w-5 h-5 mr-2 text-primary" />
-                                    {averageCompletion}%
-                                </div>
-                                <p className="text-xs text-muted-foreground">Average completion rate.</p>
-                            </div>
-                            <ChartContainer config={chartConfig} className="h-40 w-full">
-                                <RechartsBarChart data={chartData} margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
-                                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                                <ChartTooltip
-                                    cursor={false}
-                                    content={<ChartTooltipContent indicator="dot" />}
-                                />
-                                <Bar 
-                                    dataKey="total"
-                                    radius={10}
-                                    barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
-                                >
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.isToday ? 'hsl(var(--primary))' : 'hsl(var(--chart-2))'} />
-                                    ))}
-                                </Bar>
-                                </RechartsBarChart>
-                            </ChartContainer>
-                        </>
+                    {chartData.length > 0 && chartData.some(d => d.total > 0) ? (
+                        <ChartContainer config={chartConfig} className="h-48 w-full">
+                            <RechartsBarChart data={chartData} margin={{ top: 5, right: 0, bottom: 0, left: 0 }}>
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                            <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} width={30} />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar 
+                                dataKey="total"
+                                radius={8}
+                                barSize={range === 'year' ? 20 : (range === 'month' ? 8 : 20)}
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.total > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))'} opacity={entry.total > 0 ? 1 : 0.2} />
+                                ))}
+                            </Bar>
+                            </RechartsBarChart>
+                        </ChartContainer>
                     ) : (
-                        <div className="flex items-center justify-center h-[178px] border-2 border-dashed rounded-lg">
+                        <div className="flex items-center justify-center h-[208px] border-2 border-dashed rounded-lg">
                             <p className="text-muted-foreground">No chart data for this period.</p>
                         </div>
                     )}
                 </CardContent>
             </Card>
-        </div>
 
-        {/* Logs Section */}
-        <Card className="rounded-xl shadow-sm">
-            <CardHeader>
-                <CardTitle className="text-lg">Logs</CardTitle>
-                <CardDescription>Detailed entries for the selected period.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {filteredEntries.length > 0 ? (
-                    <div className="space-y-2">
-                        {filteredEntries.slice().reverse().map(entry => (
-                            <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50", {
-                                'bg-primary/10': isToday(parseDateAsLocal(entry.id)),
-                            })}>
-                                <div>
-                                    <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
-                                    <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
+            <Card className="bg-card/50">
+                <CardHeader>
+                    <CardTitle className="text-lg">Logs</CardTitle>
+                    <CardDescription>Detailed entries for the selected period.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {filteredEntries.length > 0 ? (
+                        <div className="space-y-1">
+                            {filteredEntries.slice().reverse().map(entry => (
+                                <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50")}>
+                                    <div>
+                                        <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
+                                        <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-bold text-lg">{entry.total}</p>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem onClick={() => onEdit(entry)}>
+                                                    <Pencil className="mr-2" /> Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
+                                                    <Trash2 className="mr-2" /> Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <p className="font-bold text-lg">{entry.total}</p>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="rounded-full">
-                                                <MoreHorizontal />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => onEdit(entry)}>
-                                                <Pencil className="mr-2" /> Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setDeleteCandidate(entry.id)} className="text-destructive">
-                                                <Trash2 className="mr-2" /> Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                     <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">No entries for this period.</p>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
+                            <p className="text-muted-foreground">No entries for this period.</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </Tabs>
       </div>
       
       <AlertDialog open={!!deleteCandidate} onOpenChange={(open) => !open && setDeleteCandidate(null)}>
