@@ -14,6 +14,8 @@ import { Sun, Moon, Sunrise, Sunset, Clock, Star, Heart, Users } from 'lucide-re
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { usePrayerTimes } from '@/hooks/use-prayer-times-store';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface PrayersTrackerProps {
   prayerData: PrayerTracking;
@@ -45,14 +47,15 @@ const voluntaryPrayers = [
 ];
 
 export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }) => {
+    const { timings, status, error, requestLocation } = usePrayerTimes();
     const [currentPrayer, setCurrentPrayer] = useState<PrayerName>('Isha');
     const [isFriday, setIsFriday] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
-        setCurrentPrayer(getCurrentPrayer());
+        setCurrentPrayer(getCurrentPrayer(timings));
         setIsFriday(new Date().getDay() === 5);
-    }, []);
+    }, [timings]);
 
     const handleDailyPrayerChange = (prayer: keyof PrayerTracking, prayed: boolean) => {
         const newStatus = prayed ? 'prayed' : 'skipped';
@@ -90,19 +93,34 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
 
     const currentPrayerInfo = dailyPrayersConfig.find(p => p.label === currentPrayer);
     const isCurrentPrayerPrayed = currentPrayerInfo ? (prayerData[currentPrayerInfo.id as 'fajr'] as DailyPrayer)?.status === 'prayed' : true;
-
+    
     const dailyPrayers = isFriday 
         ? dailyPrayersConfig.map(p => p.id === 'dhuhr' ? { ...p, label: 'Jumu\'ah' as PrayerName } : p)
         : dailyPrayersConfig;
 
   return (
     <div className="space-y-6">
-        {currentPrayerInfo && !isCurrentPrayerPrayed && (
+        {status === 'loading' && <Card><CardContent className="p-4">Loading prayer times...</CardContent></Card>}
+        {error && (
+            <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                    {error}
+                    {error.includes('permission') && (
+                         <Button onClick={requestLocation} className="mt-2" variant="secondary">
+                            Enable Location
+                         </Button>
+                    )}
+                </AlertDescription>
+            </Alert>
+        )}
+
+        {currentPrayerInfo && !isCurrentPrayerPrayed && status === 'success' && (
             <Card className="bg-primary/5 border-primary/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
                         <Clock className="text-primary"/>
-                        Current Prayer Time
+                        Current Prayer Time: {timings?.[currentPrayerInfo.label]}
                     </CardTitle>
                     <CardDescription>
                         {isFriday && currentPrayerInfo.label === 'Dhuhr' ? "It's time for Jumu'ah. Have you prayed?" : `It's time for ${currentPrayerInfo.label}. Have you prayed?`}
@@ -128,13 +146,17 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate }
             <CardContent className="space-y-4">
             {dailyPrayers.map((item) => {
                 const prayer = prayerData[item.id as 'fajr'] as DailyPrayer;
+                const prayerTime = timings?.[item.label];
                 return (
                     <div key={item.id} className={cn("p-4 rounded-lg transition-colors", prayer.status === 'prayed' ? 'bg-green-500/10' : 'bg-muted/30')}>
                         <div className="flex items-center justify-between">
-                            <Label htmlFor={item.id} className="text-base font-medium flex items-center gap-2">
-                                <item.icon className={cn("w-5 h-5", prayer.status === 'prayed' ? 'text-primary' : 'text-muted-foreground')} />
-                                {item.label}
-                            </Label>
+                            <div className="flex flex-col">
+                                <Label htmlFor={item.id} className="text-base font-medium flex items-center gap-2">
+                                    <item.icon className={cn("w-5 h-5", prayer.status === 'prayed' ? 'text-primary' : 'text-muted-foreground')} />
+                                    {item.label}
+                                </Label>
+                                {prayerTime && <span className="text-xs text-muted-foreground ml-7">{prayerTime}</span>}
+                            </div>
                             <Checkbox
                                 id={item.id}
                                 checked={prayer.status === 'prayed'}

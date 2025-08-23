@@ -13,6 +13,7 @@ import { usePrayerTracker } from '@/hooks/use-prayer-store';
 import { useQuranTracker } from '@/hooks/use-quran-store';
 import { getCurrentPrayer } from '@/lib/prayer-times';
 import { Separator } from './ui/separator';
+import { usePrayerTimes } from '@/hooks/use-prayer-times-store';
 
 interface Notification {
   id: string;
@@ -26,20 +27,22 @@ export const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { prayerData } = usePrayerTracker();
   const { quranData } = useQuranTracker();
+  const { timings } = usePrayerTimes();
   const isFriday = new Date().getDay() === 5;
 
   const notifications = useMemo(() => {
     const newNotifications: Notification[] = [];
     
     // Prayer notification
-    const currentPrayer = getCurrentPrayer();
+    const currentPrayer = getCurrentPrayer(timings);
     const prayerInfo = prayerData?.[currentPrayer.toLowerCase() as 'fajr'];
     if (prayerInfo && prayerInfo.status !== 'prayed') {
+      const prayerTime = timings?.[currentPrayer];
       newNotifications.push({
         id: 'prayer-time',
         icon: Sun,
         title: `Time for ${currentPrayer}`,
-        description: `It's time to perform the ${currentPrayer} prayer.`,
+        description: `It's time to perform the ${currentPrayer} prayer. ${prayerTime ? `(at ${prayerTime})` : ''}`,
         read: false,
       });
     }
@@ -77,7 +80,7 @@ export const Notifications = () => {
     }
 
     return newNotifications;
-  }, [prayerData, quranData, isFriday, isOpen]);
+  }, [prayerData, quranData, isFriday, timings, isOpen]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
