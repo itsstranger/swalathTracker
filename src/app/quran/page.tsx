@@ -5,11 +5,11 @@
 import { Header } from '@/components/header';
 import { QuranTracker } from '@/components/trackers/quran-tracker';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useQuranStore } from '@/hooks/use-quran-store';
+import { useQuranTracker } from '@/hooks/use-quran-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function QuranPage() {
-    const { isInitialized } = useQuranStore();
+    const { isInitialized } = useQuranTracker();
     const isFriday = new Date().getDay() === 5;
 
     return (

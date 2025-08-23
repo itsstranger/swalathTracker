@@ -5,11 +5,11 @@
 import { Header } from '@/components/header';
 import { PrayersTracker } from '@/components/trackers/prayers-tracker';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePrayerStore } from '@/hooks/use-prayer-store';
+import { usePrayerTracker } from '@/hooks/use-prayer-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PrayersPage() {
-    const { prayerData, updatePrayerData, isInitialized } = usePrayerStore();
+    const { prayerData, updatePrayerData, isInitialized } = usePrayerTracker();
     
     return (
         <main className="min-h-screen bg-background text-foreground font-body">

@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { BookMarked, BookOpenCheck } from 'lucide-react';
-import { useQuranStore } from '@/hooks/use-quran-store';
+import { useQuranTracker } from '@/hooks/use-quran-store';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -37,7 +37,7 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
     updateQuranData,
     setDailyGoal,
     isInitialized,
-  } = useQuranStore();
+  } = useQuranTracker();
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [goalInput, setGoalInput] = useState(20);
   const { toast } = useToast();
@@ -49,9 +49,9 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
     }
   }, [isInitialized, quranData]);
 
-  const handleGoalSubmit = () => {
+  const handleGoalSubmit = async () => {
     if (goalInput > 0) {
-      setDailyGoal(goalInput);
+      await setDailyGoal(goalInput);
       setIsGoalModalOpen(false);
       toast({
         title: 'Daily Goal Set!',
@@ -63,14 +63,14 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
   const handlePagesReadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const pages = e.target.valueAsNumber;
     if (!isNaN(pages) && quranData) {
-      updateQuranData({ ...quranData, pagesRead: pages < 0 ? 0 : pages });
+      updateQuranData({ pagesRead: pages < 0 ? 0 : pages });
     }
   };
 
   const handleSurahChange = (surah: keyof typeof quranData.surahs, checked: boolean) => {
     if (quranData) {
       const newSurahs = { ...quranData.surahs, [surah]: checked };
-      updateQuranData({ ...quranData, surahs: newSurahs });
+      updateQuranData({ surahs: newSurahs });
     }
   };
 
