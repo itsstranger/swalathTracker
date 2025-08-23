@@ -9,7 +9,7 @@ const prayerTimes = {
     Dhuhr: { start: 12, end: 15.5 },     // 12:00 PM - 3:30 PM
     Asr: { start: 15.5, end: 18 },    // 3:30 PM - 6:00 PM
     Maghrib: { start: 18, end: 19.5 },   // 6:00 PM - 7:30 PM
-    Isha: { start: 19.5, end: 24 },    // 7:30 PM - 12:00 AM
+    Isha: { start: 19.5, end: 24.01 },    // 7:30 PM - 12:00 AM+
 };
 
 export const getCurrentPrayer = (): PrayerName => {
