@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write to their own user document.
+    // This is needed for things like saving the quranGoal.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Allow users to read and write to any document in any of their subcollections.
+      // This covers prayers, quran, duas, and swalath entries.
+      match /{allSubcollections}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
