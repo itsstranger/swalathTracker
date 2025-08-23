@@ -8,11 +8,11 @@ import {
   doc,
   setDoc,
   onSnapshot,
-  getDoc,
 } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { format } from 'date-fns';
 import type { User } from 'firebase/auth';
+import { useEffect } from 'react';
 
 const LOCAL_STORE_KEY_PREFIX = 'prayer-tracker-data-';
 
