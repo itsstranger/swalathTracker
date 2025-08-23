@@ -26,6 +26,7 @@ const defaultPrayerState: PrayerTracking = {
       beforeFajr: false,
       beforeDhuhr: false,
       afterDhuhr: false,
+      beforeAsr: false,
       afterMaghrib: false,
       beforeIsha: false,
       afterIsha: false,

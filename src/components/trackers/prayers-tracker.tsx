@@ -32,6 +32,7 @@ const rawatibPrayers: { id: keyof RawatibPrayers, label: string }[] = [
     { id: 'beforeFajr', label: 'Before Fajr (2)' },
     { id: 'beforeDhuhr', label: 'Before Dhuhr (2)' },
     { id: 'afterDhuhr', label: 'After Dhuhr (2)' },
+    { id: 'beforeAsr', label: 'Before Asr (4)' },
     { id: 'afterMaghrib', label: 'After Maghrib (2)' },
     { id: 'beforeIsha', label: 'Before Isha (2)' },
     { id: 'afterIsha', label: 'After Isha (2)' },

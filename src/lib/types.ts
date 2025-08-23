@@ -23,6 +23,7 @@ export interface RawatibPrayers {
   beforeFajr: boolean;
   beforeDhuhr: boolean;
   afterDhuhr: boolean;
+  beforeAsr: boolean;
   afterMaghrib: boolean;
   beforeIsha: boolean;
   afterIsha: boolean;
