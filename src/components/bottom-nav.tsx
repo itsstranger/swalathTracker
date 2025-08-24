@@ -84,6 +84,10 @@ export const BottomNav = () => {
     { href: '/duas', label: 'Duas', icon: Moon },
     { href: '/swalath', label: 'Swalath Counter', icon: Bot },
   ];
+  
+  if (pathname === '/quran/read') {
+    return null;
+  }
 
   return (
     <>
