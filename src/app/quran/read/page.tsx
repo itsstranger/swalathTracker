@@ -13,7 +13,6 @@ export default function ReadQuranPage() {
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
   const [translations, setTranslations] = useState<Ayah[]>([]);
-  const [readerTitle, setReaderTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isReaderLoading, setIsReaderLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -78,11 +77,10 @@ export default function ReadQuranPage() {
     }
   }, [isFetchingMore]);
 
-  const fetchFullContent = useCallback(async (url: string, title: string) => {
+  const fetchFullContent = useCallback(async (url: string) => {
     try {
       setHasMore(false); // Disable infinite scroll for Juz/Page
       setIsReaderLoading(true);
-      setReaderTitle(title);
       setCurrentAyah(null);
       setAyahs([]);
       setTranslations([]);
@@ -125,7 +123,6 @@ export default function ReadQuranPage() {
     setCurrentPage(1);
     setHasMore(true);
     setIsReaderLoading(true);
-    setReaderTitle(surah.englishName);
     fetchSurahVerses(surah.number, 1);
   };
 
@@ -137,13 +134,13 @@ export default function ReadQuranPage() {
   const handleJuzSelect = (juz: number) => {
     setSelectedSurah(null);
     const url = `https://api.alquran.cloud/v1/juz/${juz}/editions/quran-uthmani,en.sahih`;
-    fetchFullContent(url, `Juz ${juz}`);
+    fetchFullContent(url);
   }
 
   const handlePageSelect = (page: number) => {
     setSelectedSurah(null);
     const url = `https://api.alquran.cloud/v1/page/${page}/editions/quran-uthmani,en.sahih`;
-    fetchFullContent(url, `Page ${page}`);
+    fetchFullContent(url);
   }
 
   return (
@@ -160,7 +157,9 @@ export default function ReadQuranPage() {
         />
         <div className="flex-1 flex flex-col transition-all duration-300 min-h-0">
           <QuranHeader
-            title={readerTitle}
+            surahs={surahs}
+            selectedSurah={selectedSurah}
+            onSurahSelect={handleSurahSelect}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             juz={currentAyah?.juz || null}
             hizb={currentAyah ? Math.floor(((currentAyah.hizbQuarter -1)/4) + 1) : null}

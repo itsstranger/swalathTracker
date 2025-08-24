@@ -2,7 +2,6 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import type { Surah } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface QuranSidebarProps {
   surahs: Surah[];
@@ -32,18 +30,12 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
   isLoading,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const filteredSurahs = surahs.filter(
     (surah) =>
       surah.englishName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       surah.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleSelect = (surah: Surah) => {
-    onSurahSelect(surah);
-    setIsPopoverOpen(false);
-  }
 
   if (!isOpen) {
     return null;
@@ -52,42 +44,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
   return (
     <aside className="w-80 bg-[#191919] border-r border-white/10 flex flex-col h-full">
       <div className="p-4 border-b border-white/10">
-        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between">
-                    <span>{selectedSurah?.englishName || 'Select Surah'}</span>
-                    <ChevronDown className="w-4 h-4" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0 w-72 bg-[#191919] border-white/10 text-white" align="start">
-                <div className="p-2">
-                   <Input
-                        placeholder="Search Surah"
-                        className="bg-black/20 border-white/10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <ScrollArea className="h-72">
-                    <div className="p-2 space-y-1">
-                        {filteredSurahs.map((surah) => (
-                            <Button
-                                key={surah.number}
-                                variant="ghost"
-                                className={cn(
-                                    'w-full justify-start',
-                                    selectedSurah?.number === surah.number && 'bg-primary/20 text-primary'
-                                )}
-                                onClick={() => handleSelect(surah)}
-                            >
-                                <span className="text-sm text-white/50 w-8">{surah.number}</span>
-                                <span>{surah.englishName}</span>
-                            </Button>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </PopoverContent>
-        </Popover>
+        <h2 className="text-xl font-bold">Quran</h2>
       </div>
       
       <Tabs defaultValue="surah" className="flex flex-col flex-1 min-h-0">
@@ -108,7 +65,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 min-h-0">
             <div className="p-4 space-y-2 pt-0">
               {isLoading ? (
                 Array.from({ length: 10 }).map((_, i) => (
@@ -134,8 +91,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </ScrollArea>
         </TabsContent>
         
-        <TabsContent value="juz" className="mt-0 flex-1">
-          <ScrollArea className="h-full">
+        <TabsContent value="juz" className="mt-0 flex-1 overflow-y-auto">
             <div className="p-4 grid grid-cols-3 gap-2">
               {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
                 <Button key={juz} variant="outline" className="bg-transparent border-white/20" onClick={() => onJuzSelect(juz)}>
@@ -143,11 +99,9 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
                 </Button>
               ))}
             </div>
-          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="page" className="mt-0 flex-1">
-            <ScrollArea className="h-full">
+        <TabsContent value="page" className="mt-0 flex-1 overflow-y-auto">
               <div className="p-4 grid grid-cols-4 gap-2">
                 {Array.from({ length: 604 }, (_, i) => i + 1).map((page) => (
                   <Button key={page} variant="outline" size="sm" className="bg-transparent border-white/20" onClick={() => onPageSelect(page)}>
@@ -155,7 +109,6 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
                   </Button>
                 ))}
               </div>
-            </ScrollArea>
         </TabsContent>
       </Tabs>
     </aside>
