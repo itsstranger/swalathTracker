@@ -82,4 +82,10 @@ export interface Ayah {
   juz: number;
   page: number;
   hizbQuarter: number;
+  surah?: {
+    number: number;
+    name: string;
+    englishName: string;
+    englishNameTranslation: string;
+  }
 }

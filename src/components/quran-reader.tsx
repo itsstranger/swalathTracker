@@ -1,8 +1,8 @@
 // src/components/quran-reader.tsx
 'use client';
 
-import { FC } from 'react';
-import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { FC, useEffect, useRef } from 'react';
+import { CardContent, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import type { Ayah } from '@/lib/types';
@@ -32,11 +32,31 @@ export const QuranReader: FC<QuranReaderProps> = ({
   surahName,
   isSingleSurahView,
 }) => {
+
+  const hasLoadedFirstAyah = useRef(false);
+
+  useEffect(() => {
+    if (ayahs.length > 0 && !hasLoadedFirstAyah.current) {
+      onFirstAyahLoad(ayahs[0]);
+      hasLoadedFirstAyah.current = true;
+    }
+  }, [ayahs, onFirstAyahLoad]);
+  
+  useEffect(() => {
+    // Reset when ayahs are cleared (new surah selected)
+    if(ayahs.length === 0) {
+      hasLoadedFirstAyah.current = false;
+    }
+  }, [ayahs]);
+
+  const Bismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
+
   return (
     <div className="bg-[#191919] rounded-lg">
       {isSingleSurahView && surahName && (
         <CardHeader className="text-center border-b border-white/10">
           <CardTitle className={cn("text-4xl font-amiri")}>{surahName}</CardTitle>
+          <p className="text-2xl font-amiri pt-4">{Bismillah}</p>
         </CardHeader>
       )}
       <CardContent className="space-y-8 p-4 md:p-8">
@@ -46,7 +66,7 @@ export const QuranReader: FC<QuranReaderProps> = ({
               const prevAyah = index > 0 ? ayahs[index - 1] : null;
               const showPageBreak = prevAyah && ayah.page !== prevAyah.page;
               return (
-                <div key={ayah.number}>
+                <div key={`${ayah.numberInSurah}-${ayah.surah?.number || 0}`}>
                   {showPageBreak && <PageBreak pageNumber={ayah.page} />}
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
@@ -67,7 +87,7 @@ export const QuranReader: FC<QuranReaderProps> = ({
                   const prevAyah = index > 0 ? ayahs[index - 1] : null;
                   const showPageBreak = prevAyah && ayah.page !== prevAyah.page;
                   return (
-                      <span key={ayah.numberInSurah}>
+                      <span key={`${ayah.numberInSurah}-${ayah.surah?.number || 0}`}>
                           {showPageBreak && (
                               <span className="inline-block w-full text-center" dir="ltr">
                                   <PageBreak pageNumber={ayah.page} />
