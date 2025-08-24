@@ -2,7 +2,7 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { DailyInsight } from '@/components/daily-insight';
 import { useSwalathStore } from '@/hooks/use-swalath-store';
 import { usePrayerTracker } from '@/hooks/use-prayer-store';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Moon, ShieldCheck, Bot } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { GlassCard } from '@/components/glass-card';
 
 export default function Home() {
   const { entries } = useSwalathStore();
@@ -41,7 +42,7 @@ export default function Home() {
 
 
   return (
-    <main className="min-h-screen bg-background text-foreground font-body">
+    <main className="min-h-screen font-body">
       <div className="container mx-auto p-4 md:p-6">
         <Header />
         <div className="mt-6 flex justify-center">
@@ -59,50 +60,50 @@ export default function Home() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link href="/prayers">
-                    <Card className="hover:bg-muted/50 transition-colors h-full">
+                    <GlassCard className="hover:bg-white/20 transition-colors h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><ShieldCheck /> Prayers</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {prayersInitialized ? (
-                                <p className="text-2xl font-bold">{completedPrayers} <span className="text-base font-normal text-muted-foreground">/ {totalPrayers} obligatory</span></p>
+                                <p className="text-2xl font-bold">{completedPrayers} <span className="text-base font-normal text-white/70">/ {totalPrayers} obligatory</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
-                    </Card>
+                    </GlassCard>
                 </Link>
                 <Link href="/quran">
-                    <Card className="hover:bg-muted/50 transition-colors h-full">
+                    <GlassCard className="hover:bg-white/20 transition-colors h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><BookOpen /> Quran</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {quranInitialized && quranData ? (
-                                <p className="text-2xl font-bold">{quranData.pagesRead} <span className="text-base font-normal text-muted-foreground">/ {quranData.dailyGoalPages} pages</span></p>
+                                <p className="text-2xl font-bold">{quranData.pagesRead} <span className="text-base font-normal text-white/70">/ {quranData.dailyGoalPages} pages</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
-                    </Card>
+                    </GlassCard>
                 </Link>
                 <Link href="/duas">
-                    <Card className="hover:bg-muted/50 transition-colors h-full">
+                    <GlassCard className="hover:bg-white/20 transition-colors h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Moon /> Duas</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {duasInitialized ? (
-                                 <p className="text-2xl font-bold">{completedDuas} <span className="text-base font-normal text-muted-foreground">/ {totalDuas} daily</span></p>
+                                 <p className="text-2xl font-bold">{completedDuas} <span className="text-base font-normal text-white/70">/ {totalDuas} daily</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
-                    </Card>
+                    </GlassCard>
                 </Link>
                 <Link href="/swalath">
-                    <Card className="hover:bg-muted/50 transition-colors h-full">
+                    <GlassCard className="hover:bg-white/20 transition-colors h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Bot /> Swalath</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{todaysSwalathEntry?.total ?? 0} <span className="text-base font-normal text-muted-foreground">today</span></p>
+                            <p className="text-2xl font-bold">{todaysSwalathEntry?.total ?? 0} <span className="text-base font-normal text-white/70">today</span></p>
                         </CardContent>
-                    </Card>
+                    </GlassCard>
                 </Link>
               </div>
 

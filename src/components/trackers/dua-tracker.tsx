@@ -2,10 +2,11 @@
 'use client';
 
 import type { FC } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import type { DuaTracking } from '@/lib/types';
+import { GlassCard } from '../glass-card';
 
 interface DuaTrackerProps {
   duaData: DuaTracking;
@@ -26,7 +27,7 @@ export const DuaTracker: FC<DuaTrackerProps> = ({ duaData, onUpdate }) => {
   };
 
   return (
-    <Card>
+    <GlassCard>
       <CardHeader>
         <CardTitle>Daily Duas</CardTitle>
       </CardHeader>
@@ -44,6 +45,6 @@ export const DuaTracker: FC<DuaTrackerProps> = ({ duaData, onUpdate }) => {
           </div>
         ))}
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 };

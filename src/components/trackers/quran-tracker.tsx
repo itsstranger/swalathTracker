@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { GlassCard } from '../glass-card';
 
 interface QuranTrackerProps {
   isFriday: boolean;
@@ -85,13 +86,13 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
   return (
     <>
       <div className="space-y-6">
-        <Card>
+        <GlassCard>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookMarked />
               Daily Recitation
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/70">
               Log the number of pages you read today and track your progress towards your daily goal.
             </CardDescription>
           </CardHeader>
@@ -100,7 +101,7 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
               <Label htmlFor="pages-read" className="text-base">
                 Pages Read Today
               </Label>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-white/70">
                 Goal: {quranData.dailyGoalPages} pages
               </span>
             </div>
@@ -109,31 +110,31 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
               type="number"
               min="0"
               placeholder="e.g., 20"
-              className="mt-2"
+              className="mt-2 bg-white/10 border-white/20 placeholder:text-white/50"
               value={quranData.pagesRead || ''}
               onChange={handlePagesReadChange}
             />
             <div className="space-y-2">
               <Progress value={progress} />
-              <p className="text-right text-sm text-muted-foreground">{progress}% complete</p>
+              <p className="text-right text-sm text-white/70">{progress}% complete</p>
             </div>
           </CardContent>
-        </Card>
+        </GlassCard>
 
-        <Card>
+        <GlassCard>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpenCheck />
               Daily Surahs
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/70">
               Mark the special Surahs you recited today.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               {surahItems.map((item) => (
-                <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-white/10">
                   <Checkbox
                     id={item.id}
                     checked={quranData.surahs[item.id as keyof typeof quranData.surahs]}
@@ -145,7 +146,7 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
                 </div>
               ))}
               {isFriday && (
-                <div key="kahf" className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 bg-primary/10">
+                <div key="kahf" className="flex items-center space-x-2 p-2 rounded-md hover:bg-white/10 bg-primary/20">
                   <Checkbox
                     id="kahf"
                     checked={quranData.surahs.kahf}
@@ -158,7 +159,7 @@ export const QuranTracker = ({ isFriday }: QuranTrackerProps) => {
               )}
             </div>
           </CardContent>
-        </Card>
+        </GlassCard>
       </div>
 
       <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>

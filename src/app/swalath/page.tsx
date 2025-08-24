@@ -6,10 +6,11 @@ import { useSwalathStore } from '@/hooks/use-swalath-store';
 import { Header } from '@/components/header';
 import { HistoryView } from '@/components/history-view';
 import { HadithBanner } from '@/components/hadith-banner';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarPlus, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { GlassCard } from '@/components/glass-card';
 
 export default function SwalathTrackerPage() {
   const entries = useSwalathStore((state) => state.entries);
@@ -31,24 +32,24 @@ export default function SwalathTrackerPage() {
   }
   
   return (
-    <main className="min-h-screen bg-background text-foreground font-body">
+    <main className="min-h-screen font-body">
       <div className="container mx-auto p-4 md:p-6">
         <Header />
         <div className="mt-6 flex justify-center">
             <div className="w-full md:w-3/4 space-y-6">
-                <Card>
+                <GlassCard>
                     <CardHeader>
                         <CardTitle>Swalath Counter</CardTitle>
-                        <CardDescription>A simple counter to track total Swalaths for the day.</CardDescription>
+                        <CardDescription className="text-white/70">A simple counter to track total Swalaths for the day.</CardDescription>
                     </CardHeader>
-                </Card>
+                </GlassCard>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button onClick={handleOpenForToday} size="lg" variant="outline">
+                    <Button onClick={handleOpenForToday} size="lg" variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
                         <Plus className="mr-2" />
                         Add/Edit Today's Entry
                     </Button>
-                    <Button onClick={openDatePicker} size="lg" variant="outline">
+                    <Button onClick={openDatePicker} size="lg" variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
                         <CalendarPlus className="mr-2" />
                         Entry for Custom Date
                     </Button>

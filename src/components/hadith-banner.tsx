@@ -4,10 +4,11 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { BookOpenText } from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDailyHadith, type DailyHadithOutput } from '@/ai/flows/daily-hadith';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GlassCard } from './glass-card';
 
 export const HadithBanner: FC = () => {
   const [data, setData] = useState<DailyHadithOutput | null>(null);
@@ -32,7 +33,7 @@ export const HadithBanner: FC = () => {
   }, []);
 
   return (
-    <Card className="bg-primary/10 border-primary/20">
+    <GlassCard className="bg-primary/20 border-primary/30">
       <CardContent className="p-4 md:p-6">
         {isLoading && (
           <div className="space-y-2">
@@ -42,7 +43,7 @@ export const HadithBanner: FC = () => {
           </div>
         )}
         {error && (
-            <Alert variant="destructive" className="bg-destructive/10 border-none">
+            <Alert variant="destructive" className="bg-destructive/10 border-none text-white">
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -55,18 +56,18 @@ export const HadithBanner: FC = () => {
             </div>
             <div className="space-y-4">
               <blockquote className="border-r-4 border-primary pr-4 text-right" lang="ar" dir="rtl">
-                <p className="text-lg text-foreground/90 font-arabic">{data.arabicText}</p>
+                <p className="text-lg text-white/90 font-arabic">{data.arabicText}</p>
               </blockquote>
               <blockquote className="border-l-4 border-primary pl-4 italic">
-                <p className="text-foreground/90">"{data.englishTranslation}"</p>
+                <p className="text-white/90">"{data.englishTranslation}"</p>
               </blockquote>
             </div>
-            <p className="mt-3 text-right text-sm text-muted-foreground font-medium">
+            <p className="mt-3 text-right text-sm text-white/70 font-medium">
               - {data.source}
             </p>
           </div>
         )}
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 };

@@ -3,10 +3,11 @@
 
 import type { FC } from 'react';
 import { useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2 } from 'lucide-react';
 import type { PrayerTracking, QuranTracking, DuaTracking } from '@/lib/types';
+import { GlassCard } from './glass-card';
 
 interface TodaysProgressProps {
   prayerData: PrayerTracking | null;
@@ -60,21 +61,21 @@ export const TodaysProgress: FC<TodaysProgressProps> = ({ prayerData, quranData,
   }
 
   return (
-    <Card className="bg-primary/10 border-primary/20">
+    <GlassCard className="bg-primary/20 border-primary/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
             <CheckCircle2 className="text-primary" />
             Today's Progress
         </CardTitle>
-        <CardDescription>{getGreeting()}</CardDescription>
+        <CardDescription className="text-white/70">{getGreeting()}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         <Progress value={progress} />
         <div className="flex justify-between items-center text-sm">
-            <p className="text-muted-foreground">{completedTasks} of {totalTasks} tasks completed</p>
+            <p className="text-white/70">{completedTasks} of {totalTasks} tasks completed</p>
             <p className="font-bold text-primary">{progress}%</p>
         </div>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 };

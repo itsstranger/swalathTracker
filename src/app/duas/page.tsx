@@ -3,25 +3,26 @@
 
 import { Header } from '@/components/header';
 import { DuaTracker } from '@/components/trackers/dua-tracker';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDuaTracker } from '@/hooks/use-dua-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GlassCard } from '@/components/glass-card';
 
 export default function DuasPage() {
     const { duaData, updateDuaData, isInitialized } = useDuaTracker();
     
     return (
-        <main className="min-h-screen bg-background text-foreground font-body">
+        <main className="min-h-screen font-body">
             <div className="container mx-auto p-4 md:p-6">
                 <Header />
                 <div className="mt-6 flex justify-center">
                     <div className="w-full md:w-3/4 space-y-6">
-                        <Card>
+                        <GlassCard>
                             <CardHeader>
                                 <CardTitle>Daily Duas</CardTitle>
-                                <CardDescription>Mark your daily Duas and supplications.</CardDescription>
+                                <CardDescription className="text-white/70">Mark your daily Duas and supplications.</CardDescription>
                             </CardHeader>
-                        </Card>
+                        </GlassCard>
                         {isInitialized && duaData ? (
                             <DuaTracker duaData={duaData} onUpdate={updateDuaData} />
                         ) : (

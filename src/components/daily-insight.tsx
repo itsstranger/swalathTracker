@@ -6,7 +6,6 @@ import { BrainCircuit, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -15,6 +14,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDailyInsights } from '@/ai/flows/daily-insights';
 import type { SwalathEntry } from '@/lib/types';
+import { GlassCard } from './glass-card';
 
 interface DailyInsightProps {
   entry: SwalathEntry | null;
@@ -50,13 +50,13 @@ export const DailyInsight: FC<DailyInsightProps> = ({ entry }) => {
   };
 
   return (
-    <Card>
+    <GlassCard>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
           <BrainCircuit />
           AI-Powered Feedback
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-white/70">
           Get personalized advice and encouragement based on today's entry.
         </CardDescription>
       </CardHeader>
@@ -81,11 +81,11 @@ export const DailyInsight: FC<DailyInsightProps> = ({ entry }) => {
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
         {insight && (
-          <div className="mt-4 rounded-md border bg-muted/50 p-4 text-sm">
+          <div className="mt-4 rounded-md border border-white/20 bg-white/10 p-4 text-sm">
             <p className="whitespace-pre-wrap">{insight}</p>
           </div>
         )}
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 };

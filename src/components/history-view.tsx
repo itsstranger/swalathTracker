@@ -7,7 +7,6 @@ import { BarChart, CalendarDays, MoreHorizontal, Pencil, Sigma, Trash2, Trending
 import { format, parseISO, eachDayOfInterval, subMonths, eachMonthOfInterval, getMonth, getYear, isToday, differenceInDays, subDays } from 'date-fns';
 
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -40,6 +39,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GlassCard } from './glass-card';
 
 interface HistoryViewProps {
   entries: SwalathEntry[];
@@ -165,7 +165,7 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
         <Tabs value={range} onValueChange={(value) => setRange(value as Range)}>
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold font-headline">History & Stats</h2>
-                <TabsList>
+                <TabsList className="bg-white/10 text-white">
                     <TabsTrigger value="week">Week</TabsTrigger>
                     <TabsTrigger value="month">Month</TabsTrigger>
                     <TabsTrigger value="year">Year</TabsTrigger>
@@ -173,46 +173,46 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
             </div>
             <TabsContent value={range} className="space-y-6 mt-4">
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Card className="bg-card/50">
+                  <GlassCard>
                       <CardHeader>
-                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
                             <Sigma className="w-4 h-4" /> Total Swalaths
                           </CardTitle>
                           <p className="text-2xl font-bold">{totalSwalaths.toLocaleString()}</p>
                       </CardHeader>
-                  </Card>
-                  <Card className="bg-card/50">
+                  </GlassCard>
+                  <GlassCard>
                       <CardHeader>
-                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" /> Avg Per Day
                           </CardTitle>
                           <p className="text-2xl font-bold">{averagePerDay.toLocaleString()}</p>
                       </CardHeader>
-                  </Card>
-                  <Card className="bg-card/50 col-span-2 lg:col-span-1">
+                  </GlassCard>
+                  <GlassCard className="col-span-2 lg:col-span-1">
                       <CardHeader>
-                          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
                             <CalendarDays className="w-4 h-4" /> Days Tracked
                           </CardTitle>
                           <p className="text-2xl font-bold">{daysTracked} / {totalDaysInRange}</p>
                       </CardHeader>
-                  </Card>
+                  </GlassCard>
               </div>
 
-              <Card className="bg-card/50">
+              <GlassCard>
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                           <BarChart className="w-5 h-5" />
                           Activity
                       </CardTitle>
-                      <CardDescription>{dateRangeLabel}</CardDescription>
+                      <CardDescription className="text-white/70">{dateRangeLabel}</CardDescription>
                   </CardHeader>
                   <CardContent>
                       {chartData.length > 0 && chartData.some(d => d.total > 0) ? (
                           <ChartContainer config={chartConfig} className="h-48 w-full">
                               <RechartsBarChart data={chartData} margin={{ top: 5, right: 0, bottom: 0, left: 0 }}>
-                              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                              <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} width={30} />
+                              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} stroke="#fff" />
+                              <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} width={30} stroke="#fff"/>
                               <ChartTooltip
                                   cursor={false}
                                   content={<ChartTooltipContent indicator="dot" />}
@@ -229,32 +229,32 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                               </RechartsBarChart>
                           </ChartContainer>
                       ) : (
-                          <div className="flex items-center justify-center h-[208px] border-2 border-dashed rounded-lg">
-                              <p className="text-muted-foreground">No chart data for this period.</p>
+                          <div className="flex items-center justify-center h-[208px] border-2 border-dashed border-white/20 rounded-lg">
+                              <p className="text-white/70">No chart data for this period.</p>
                           </div>
                       )}
                   </CardContent>
-              </Card>
+              </GlassCard>
 
-              <Card className="bg-card/50">
+              <GlassCard>
                   <CardHeader>
                       <CardTitle className="text-lg">Logs</CardTitle>
-                      <CardDescription>Detailed entries for the selected period.</CardDescription>
+                      <CardDescription className="text-white/70">Detailed entries for the selected period.</CardDescription>
                   </CardHeader>
                   <CardContent>
                       {filteredEntries.length > 0 ? (
                           <div className="space-y-1">
                               {filteredEntries.slice().reverse().map(entry => (
-                                  <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50")}>
+                                  <div key={entry.id} className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-white/10")}>
                                       <div>
                                           <p className="font-semibold">{format(parseDateAsLocal(entry.id), 'EEEE')}</p>
-                                          <p className="text-sm text-muted-foreground">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
+                                          <p className="text-sm text-white/70">{format(parseDateAsLocal(entry.id), 'MMMM d, yyyy')}</p>
                                       </div>
                                       <div className="flex items-center gap-2">
                                           <p className="font-bold text-lg">{entry.total}</p>
                                           <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
-                                                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                                                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-white hover:bg-white/20 hover:text-white">
                                                       <MoreHorizontal className="h-4 w-4" />
                                                   </Button>
                                               </DropdownMenuTrigger>
@@ -272,12 +272,12 @@ export const HistoryView: FC<HistoryViewProps> = ({ entries, onEdit, onDelete })
                               ))}
                           </div>
                       ) : (
-                          <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-lg">
-                              <p className="text-muted-foreground">No entries for this period.</p>
+                          <div className="flex items-center justify-center h-24 border-2 border-dashed border-white/20 rounded-lg">
+                              <p className="text-white/70">No entries for this period.</p>
                           </div>
                       )}
                   </CardContent>
-              </Card>
+              </GlassCard>
             </TabsContent>
         </Tabs>
       </div>

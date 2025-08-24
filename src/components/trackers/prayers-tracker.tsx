@@ -4,7 +4,7 @@
 
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { usePrayerTimes } from '@/hooks/use-prayer-times-store';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { GlassCard } from '../glass-card';
 
 interface PrayersTrackerProps {
   prayerData: PrayerTracking;
@@ -54,7 +55,8 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
     const { toast } = useToast();
 
     useEffect(() => {
-        setCurrentPrayer(getCurrentPrayer(timings));
+        const prayer = getCurrentPrayer(timings);
+        if(prayer) setCurrentPrayer(prayer);
     }, [timings]);
 
     const handleDailyPrayerChange = (prayer: keyof PrayerTracking, prayed: boolean) => {
@@ -100,7 +102,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
 
   return (
     <div className="space-y-6">
-        {status === 'loading' && <Card><CardContent className="p-4">Loading prayer times...</CardContent></Card>}
+        {status === 'loading' && <GlassCard><CardContent className="p-4">Loading prayer times...</CardContent></GlassCard>}
         {error && (
             <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
@@ -116,13 +118,13 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
         )}
 
         {currentPrayerInfo && !isCurrentPrayerPrayed && status === 'success' && (
-            <Card className="bg-primary/5 border-primary/20">
+            <GlassCard className="bg-primary/20 border-primary/30">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
                         <Clock className="text-primary"/>
                         Current Prayer Time: {timings?.[currentPrayerInfo.label]}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-white/70">
                         {isFriday && currentPrayerInfo.label === 'Dhuhr' ? "It's time for Jumu'ah. Have you prayed?" : `It's time for ${currentPrayerInfo.label}. Have you prayed?`}
                     </CardDescription>
                 </CardHeader>
@@ -136,10 +138,10 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                         I have prayed {isFriday && currentPrayerInfo.label === 'Dhuhr' ? 'Jumu\'ah' : currentPrayerInfo.label}
                     </Button>
                 </CardContent>
-            </Card>
+            </GlassCard>
         )}
 
-        <Card>
+        <GlassCard>
             <CardHeader>
                 <CardTitle>Daily Obligatory Prayers</CardTitle>
             </CardHeader>
@@ -148,14 +150,14 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                 const prayer = prayerData[item.id as 'fajr'] as DailyPrayer;
                 const prayerTime = timings?.[item.label];
                 return (
-                    <div key={item.id} className={cn("p-4 rounded-lg transition-colors", prayer.status === 'prayed' ? 'bg-green-500/10' : 'bg-muted/30')}>
+                    <div key={item.id} className={cn("p-4 rounded-lg transition-colors", prayer.status === 'prayed' ? 'bg-green-500/20' : 'bg-white/5')}>
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
                                 <Label htmlFor={item.id} className="text-base font-medium flex items-center gap-2">
-                                    <item.icon className={cn("w-5 h-5", prayer.status === 'prayed' ? 'text-primary' : 'text-muted-foreground')} />
+                                    <item.icon className={cn("w-5 h-5", prayer.status === 'prayed' ? 'text-primary' : 'text-white/70')} />
                                     {item.label}
                                 </Label>
-                                {prayerTime && <span className="text-xs text-muted-foreground ml-7">{prayerTime}</span>}
+                                {prayerTime && <span className="text-xs text-white/70 ml-7">{prayerTime}</span>}
                             </div>
                             <Checkbox
                                 id={item.id}
@@ -186,7 +188,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                                         onCheckedChange={(checked) => onUpdate({ ...prayerData, [item.id]: { ...prayer, withJamaah: !!checked }})}
                                     />
                                     <Label htmlFor={`${item.id}-jamaah`} className="flex items-center gap-1">
-                                        <Users className="w-4 h-4 text-muted-foreground"/>
+                                        <Users className="w-4 h-4 text-white/70"/>
                                         With Jama'ah
                                     </Label>
                                 </div>
@@ -196,19 +198,19 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                 );
             })}
             </CardContent>
-        </Card>
+        </GlassCard>
 
-        <Card>
+        <GlassCard>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Heart className="text-pink-500" />
                     Rawatib Prayers (Sunnah Mu'akkadah)
                 </CardTitle>
-                <CardDescription>The confirmed voluntary prayers linked to the five daily prayers.</CardDescription>
+                <CardDescription className="text-white/70">The confirmed voluntary prayers linked to the five daily prayers.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {rawatibPrayers.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                    <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-white/10">
                         <Checkbox
                             id={`rawathib-${item.id}`}
                             checked={prayerData.rawathib[item.id]}
@@ -220,9 +222,9 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                     </div>
                 ))}
             </CardContent>
-        </Card>
+        </GlassCard>
 
-        <Card>
+        <GlassCard>
             <CardHeader>
                 <CardTitle>Other Voluntary Prayers</CardTitle>
             </CardHeader>
@@ -239,7 +241,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                             max={item.max}
                             step={item.step || 1}
                             placeholder="Raka'hs"
-                            className="w-28"
+                            className="w-28 bg-white/10 border-white/20"
                             value={prayerData[item.id as 'tahajjud'] || ''}
                             onChange={(e) => {
                                 let value = e.target.valueAsNumber;
@@ -262,7 +264,7 @@ export const PrayersTracker: FC<PrayersTrackerProps> = ({ prayerData, onUpdate, 
                     </div>
                 ))}
             </CardContent>
-        </Card>
+        </GlassCard>
     </div>
   );
 };
