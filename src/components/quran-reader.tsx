@@ -2,26 +2,11 @@
 'use client';
 
 import { useState, useEffect, FC } from 'react';
-import { GlassCard } from './glass-card';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Skeleton } from './ui/skeleton';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
-
-interface Surah {
-  number: number;
-  name: string;
-  englishName: string;
-  englishNameTranslation: string;
-  revelationType: string;
-  numberOfAyahs: number;
-}
-
-interface Ayah {
-  number: number;
-  text: string;
-  numberInSurah: number;
-}
+import type { Surah, Ayah } from '@/lib/types';
 
 interface QuranReaderProps {
   surah: Surah;
@@ -55,35 +40,24 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
   }, [surah]);
 
   return (
-    <GlassCard>
-      <CardHeader className="text-center">
+    <div className="bg-[#191919] rounded-lg">
+      <CardHeader className="text-center border-b border-white/10">
         <CardTitle className={cn("text-4xl font-amiri")}>{surah.name}</CardTitle>
         <CardDescription className="text-white/80 text-xl font-headline">
           {surah.englishName} ({surah.englishNameTranslation})
         </CardDescription>
         <p className="text-sm text-white/60">{surah.revelationType} - {surah.numberOfAyahs} Ayahs</p>
       </CardHeader>
-      <CardContent className="space-y-8">
+      <CardContent className="space-y-8 p-4 md:p-8">
         {isLoading ? (
           <div className="space-y-6">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full bg-gray-700" />
+            <Skeleton className="h-16 w-full bg-gray-700" />
+            <Skeleton className="h-16 w-full bg-gray-700" />
           </div>
         ) : (
           <div className="space-y-6">
-            {!showTranslation ? (
-              <p className="text-3xl font-amiri text-right leading-loose text-justify" dir="rtl">
-                {ayats.arabic.map((ayah) => (
-                  <span key={ayah.numberInSurah}>
-                    {ayah.text}
-                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-8 h-8 leading-8 text-center font-sans">
-                        {ayah.numberInSurah.toLocaleString('ar-EG')}
-                    </span>
-                  </span>
-                ))}
-              </p>
-            ) : (
+            {showTranslation ? (
               ayats.arabic.map((ayah, index) => (
                 <div key={ayah.number}>
                   <div className="space-y-4">
@@ -98,10 +72,21 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
                   {index < ayats.arabic.length - 1 && <Separator className="my-6 bg-white/20"/>}
                 </div>
               ))
+            ) : (
+              <p className="text-3xl font-amiri text-right leading-loose text-justify" dir="rtl">
+                {ayats.arabic.map((ayah) => (
+                  <span key={ayah.numberInSurah}>
+                    {ayah.text}
+                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-8 h-8 leading-8 text-center font-sans">
+                        {ayah.numberInSurah.toLocaleString('ar-EG')}
+                    </span>
+                  </span>
+                ))}
+              </p>
             )}
           </div>
         )}
       </CardContent>
-    </GlassCard>
+    </div>
   );
 };

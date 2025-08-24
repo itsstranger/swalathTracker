@@ -65,3 +65,18 @@ export interface DailyEntry {
   duas: Partial<DuaTracking>;
   notes?: string;
 }
+
+export interface Surah {
+  number: number;
+  name: string;
+  englishName: string;
+  englishNameTranslation: string;
+  revelationType: string;
+  numberOfAyahs: number;
+}
+
+export interface Ayah {
+  number: number;
+  text: string;
+  numberInSurah: number;
+}
