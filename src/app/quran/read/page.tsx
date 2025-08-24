@@ -147,53 +147,55 @@ export default function ReadQuranPage() {
   }
 
   return (
-    <main className="h-screen font-body flex bg-[#111111] text-white overflow-hidden">
-      <QuranSidebar
-        surahs={surahs}
-        selectedSurah={selectedSurah}
-        onSurahSelect={handleSurahSelect}
-        onJuzSelect={handleJuzSelect}
-        onPageSelect={handlePageSelect}
-        isOpen={isSidebarOpen}
-        isLoading={isLoading}
-      />
-      <div className="flex-1 flex flex-col transition-all duration-300 min-h-0">
-        <QuranHeader
-          title={readerTitle}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          juz={currentAyah?.juz || null}
-          hizb={currentAyah ? Math.floor(((currentAyah.hizbQuarter -1)/4) + 1) : null}
-          page={currentAyah?.page || null}
-          showTranslation={showTranslation}
-          onToggleTranslation={() => setShowTranslation(!showTranslation)}
+    <main className="font-body bg-[#111111] text-white">
+      <div className="flex h-screen w-full">
+        <QuranSidebar
+          surahs={surahs}
+          selectedSurah={selectedSurah}
+          onSurahSelect={handleSurahSelect}
+          onJuzSelect={handleJuzSelect}
+          onPageSelect={handlePageSelect}
+          isOpen={isSidebarOpen}
+          isLoading={isLoading}
         />
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="mx-auto max-w-2xl">
-            {isReaderLoading && ayahs.length === 0 ? (
-              <div className="space-y-6">
-                <Skeleton className="h-16 w-full bg-gray-700" />
-                <Skeleton className="h-16 w-full bg-gray-700" />
-                <Skeleton className="h-16 w-full bg-gray-700" />
-              </div>
-            ) : (
-              <>
-                <QuranReader 
-                  ayahs={ayahs}
-                  translations={translations}
-                  showTranslation={showTranslation}
-                  onFirstAyahLoad={setCurrentAyah}
-                  surah={selectedSurah}
-                  isSingleSurahView={!!selectedSurah}
-                />
-                {isFetchingMore && (
-                  <div className="space-y-6 mt-6">
-                    <Skeleton className="h-16 w-full bg-gray-700" />
-                    <Skeleton className="h-16 w-full bg-gray-700" />
-                  </div>
-                )}
-                {hasMore && !isFetchingMore && <div ref={lastVerseElementRef} style={{ height: '10px' }} />}
-              </>
-            )}
+        <div className="flex-1 flex flex-col transition-all duration-300 min-h-0">
+          <QuranHeader
+            title={readerTitle}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            juz={currentAyah?.juz || null}
+            hizb={currentAyah ? Math.floor(((currentAyah.hizbQuarter -1)/4) + 1) : null}
+            page={currentAyah?.page || null}
+            showTranslation={showTranslation}
+            onToggleTranslation={() => setShowTranslation(!showTranslation)}
+          />
+          <div className="flex-1 overflow-y-auto p-4 md:p-8">
+            <div className="mx-auto max-w-2xl">
+              {isReaderLoading && ayahs.length === 0 ? (
+                <div className="space-y-6">
+                  <Skeleton className="h-16 w-full bg-gray-700" />
+                  <Skeleton className="h-16 w-full bg-gray-700" />
+                  <Skeleton className="h-16 w-full bg-gray-700" />
+                </div>
+              ) : (
+                <>
+                  <QuranReader 
+                    ayahs={ayahs}
+                    translations={translations}
+                    showTranslation={showTranslation}
+                    onFirstAyahLoad={setCurrentAyah}
+                    surah={selectedSurah}
+                    isSingleSurahView={!!selectedSurah}
+                  />
+                  {isFetchingMore && (
+                    <div className="space-y-6 mt-6">
+                      <Skeleton className="h-16 w-full bg-gray-700" />
+                      <Skeleton className="h-16 w-full bg-gray-700" />
+                    </div>
+                  )}
+                  {hasMore && !isFetchingMore && <div ref={lastVerseElementRef} style={{ height: '10px' }} />}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
