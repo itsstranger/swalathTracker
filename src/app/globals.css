@@ -14,7 +14,7 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 221 83% 53%; /* Vibrant blue */
+    --primary: 160 70% 45%; /* Vibrant Green/Teal */
     --primary-foreground: 0 0% 100%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -26,8 +26,8 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 221 83% 53%; /* Vibrant blue for ring */
-    --chart-1: 221 83% 53%;
+    --ring: 160 70% 45%; /* Green for ring */
+    --chart-1: 160 70% 45%;
     --chart-2: 240 5.9% 10%;
     --chart-3: 170 60% 30%;
     --chart-4: 170 50% 70%;
@@ -35,19 +35,19 @@ body {
     --radius: 0.75rem;
     --sidebar-background: 240 10% 3.9%; /* Dark sidebar */
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 160 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-ring: 160 70% 45%;
   }
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --primary: 221 83% 53%;
+    --primary: 160 70% 45%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -59,20 +59,20 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 221 83% 53%;
-    --chart-1: 221 83% 53%;
+    --ring: 160 70% 45%;
+    --chart-1: 160 70% 45%;
     --chart-2: 0 0% 85%;
     --chart-3: 170 60% 60%;
     --chart-4: 170 50% 40%;
     --chart-5: 165 90% 65%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 160 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 160 70% 45%;
   }
 }
 
@@ -82,6 +82,6 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(to top right, #0c2340, #1a4a7a, #3a8d9d);
+    background-image: linear-gradient(to top right, #0a2d27, #104f43, #1e8a79);
   }
 }
