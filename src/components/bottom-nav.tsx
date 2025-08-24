@@ -56,6 +56,7 @@ export const BottomNav = () => {
   
   const selectedEntry = getSelectedEntry();
   const pathname = usePathname();
+  const isQuranReaderPage = pathname === '/quran/read';
 
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
@@ -88,7 +89,12 @@ export const BottomNav = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className={cn(
+        "fixed z-50",
+        isQuranReaderPage 
+          ? "bottom-6 left-6" 
+          : "bottom-6 left-1/2 -translate-x-1/2"
+      )}>
         <Popover open={isFabMenuOpen} onOpenChange={setIsFabMenuOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -98,7 +104,11 @@ export const BottomNav = () => {
               <Menu className={cn("transition-transform duration-300", { "rotate-90": isFabMenuOpen })} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-2 mb-2 rounded-2xl" align="center" side="top">
+          <PopoverContent 
+            className="w-64 p-2 mb-2 rounded-2xl" 
+            align={isQuranReaderPage ? "start" : "center"} 
+            side="top"
+          >
             <div className="flex flex-col gap-1">
               {navLinks.map(({ href, label, icon: Icon }) => (
                 <Link href={href} passHref key={href}>
