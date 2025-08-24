@@ -168,31 +168,33 @@ export default function ReadQuranPage() {
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
         />
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          {isReaderLoading && ayahs.length === 0 ? (
-            <div className="space-y-6">
-              <Skeleton className="h-16 w-full bg-gray-700" />
-              <Skeleton className="h-16 w-full bg-gray-700" />
-              <Skeleton className="h-16 w-full bg-gray-700" />
-            </div>
-          ) : (
-            <>
-              <QuranReader 
-                ayahs={ayahs}
-                translations={translations}
-                showTranslation={showTranslation}
-                onFirstAyahLoad={setCurrentAyah}
-                surah={selectedSurah}
-                isSingleSurahView={!!selectedSurah}
-              />
-              {isFetchingMore && (
-                <div className="space-y-6 mt-6">
-                  <Skeleton className="h-16 w-full bg-gray-700" />
-                  <Skeleton className="h-16 w-full bg-gray-700" />
-                </div>
-              )}
-              {hasMore && !isFetchingMore && <div ref={lastVerseElementRef} style={{ height: '10px' }} />}
-            </>
-          )}
+          <div className="max-w-4xl mx-auto">
+            {isReaderLoading && ayahs.length === 0 ? (
+              <div className="space-y-6">
+                <Skeleton className="h-16 w-full bg-gray-700" />
+                <Skeleton className="h-16 w-full bg-gray-700" />
+                <Skeleton className="h-16 w-full bg-gray-700" />
+              </div>
+            ) : (
+              <>
+                <QuranReader 
+                  ayahs={ayahs}
+                  translations={translations}
+                  showTranslation={showTranslation}
+                  onFirstAyahLoad={setCurrentAyah}
+                  surah={selectedSurah}
+                  isSingleSurahView={!!selectedSurah}
+                />
+                {isFetchingMore && (
+                  <div className="space-y-6 mt-6">
+                    <Skeleton className="h-16 w-full bg-gray-700" />
+                    <Skeleton className="h-16 w-full bg-gray-700" />
+                  </div>
+                )}
+                {hasMore && !isFetchingMore && <div ref={lastVerseElementRef} style={{ height: '10px' }} />}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </main>
