@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { QuranReader } from '@/components/quran-reader';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface Surah {
   number: number;
@@ -24,10 +26,13 @@ interface Surah {
   numberOfAyahs: number;
 }
 
+type ViewMode = 'with-translation' | 'reading-only';
+
 export default function ReadQuranPage() {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [selectedSurah, setSelectedSurah] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('with-translation');
 
   useEffect(() => {
     async function fetchSurahs() {
@@ -62,9 +67,9 @@ export default function ReadQuranPage() {
             <GlassCard>
               <CardHeader>
                 <CardTitle>Read the Holy Quran</CardTitle>
-                <CardDescription className="text-white/70">Select a Surah to begin reading.</CardDescription>
+                <CardDescription className="text-white/70">Select a Surah and reading mode to begin.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 {isLoading ? (
                   <Skeleton className="h-10 w-full" />
                 ) : (
@@ -81,11 +86,25 @@ export default function ReadQuranPage() {
                     </SelectContent>
                   </Select>
                 )}
+                <RadioGroup
+                    value={viewMode}
+                    onValueChange={(value: ViewMode) => setViewMode(value)}
+                    className="flex items-center space-x-4"
+                >
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="with-translation" id="with-translation" />
+                        <Label htmlFor="with-translation">With Translation</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="reading-only" id="reading-only" />
+                        <Label htmlFor="reading-only">Reading Only</Label>
+                    </div>
+                </RadioGroup>
               </CardContent>
             </GlassCard>
 
             {selectedSurahInfo && (
-                <QuranReader surah={selectedSurahInfo} />
+                <QuranReader surah={selectedSurahInfo} showTranslation={viewMode === 'with-translation'} />
             )}
           </div>
         </div>

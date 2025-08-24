@@ -24,9 +24,10 @@ interface Ayah {
 
 interface QuranReaderProps {
   surah: Surah;
+  showTranslation: boolean;
 }
 
-export const QuranReader: FC<QuranReaderProps> = ({ surah }) => {
+export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) => {
   const [ayats, setAyats] = useState<{ arabic: Ayah[]; english: Ayah[] }>({ arabic: [], english: [] });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -76,9 +77,11 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah }) => {
                     <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
                     <p className="text-2xl font-arabic text-right flex-1" dir="rtl">{ayah.text}</p>
                 </div>
-                <p className="text-white/80 pl-12">
-                  {ayats.english[index]?.text}
-                </p>
+                {showTranslation && (
+                  <p className="text-white/80 pl-12">
+                    {ayats.english[index]?.text}
+                  </p>
+                )}
               </div>
               {index < ayats.arabic.length - 1 && <Separator className="my-6 bg-white/20"/>}
             </div>
