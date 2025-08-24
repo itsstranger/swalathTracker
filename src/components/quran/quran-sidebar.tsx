@@ -52,13 +52,15 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
       </div>
       
       <Tabs defaultValue="surah" className="flex-1 flex flex-col min-h-0">
-        <TabsList className="grid w-full grid-cols-3 bg-transparent p-4">
-          <TabsTrigger value="surah">Surah</TabsTrigger>
-          <TabsTrigger value="juz">Juz</TabsTrigger>
-          <TabsTrigger value="page">Page</TabsTrigger>
-        </TabsList>
+        <div className="px-4 pt-4">
+          <TabsList className="grid w-full grid-cols-3 bg-transparent">
+            <TabsTrigger value="surah">Surah</TabsTrigger>
+            <TabsTrigger value="juz">Juz</TabsTrigger>
+            <TabsTrigger value="page">Page</TabsTrigger>
+          </TabsList>
+        </div>
         
-        <TabsContent value="surah" className="flex-1 flex flex-col min-h-0">
+        <TabsContent value="surah" className="flex-1 flex flex-col min-h-0 mt-0">
           <div className="p-4">
             <Input
               placeholder="Search Surah"
@@ -67,33 +69,35 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-2">
-              {isLoading ? (
-                Array.from({ length: 10 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full bg-gray-700" />
-                ))
-              ) : (
-                filteredSurahs.map((surah) => (
-                  <Button
-                    key={surah.number}
-                    variant="ghost"
-                    className={cn(
-                      'w-full justify-start',
-                      selectedSurah?.number === surah.number && 'bg-primary/20 text-primary'
-                    )}
-                    onClick={() => onSurahSelect(surah)}
-                  >
-                    <span className="text-sm text-white/50 w-8">{surah.number}</span>
-                    <span>{surah.englishName}</span>
-                  </Button>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-2 pt-0">
+                {isLoading ? (
+                  Array.from({ length: 10 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full bg-gray-700" />
+                  ))
+                ) : (
+                  filteredSurahs.map((surah) => (
+                    <Button
+                      key={surah.number}
+                      variant="ghost"
+                      className={cn(
+                        'w-full justify-start',
+                        selectedSurah?.number === surah.number && 'bg-primary/20 text-primary'
+                      )}
+                      onClick={() => onSurahSelect(surah)}
+                    >
+                      <span className="text-sm text-white/50 w-8">{surah.number}</span>
+                      <span>{surah.englishName}</span>
+                    </Button>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         </TabsContent>
         
-        <TabsContent value="juz" className="flex-1 min-h-0">
+        <TabsContent value="juz" className="flex-1 min-h-0 mt-0">
           <ScrollArea className="h-full">
             <div className="p-4 grid grid-cols-3 gap-2">
               {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
@@ -105,7 +109,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="page" className="flex-1 min-h-0">
+        <TabsContent value="page" className="flex-1 min-h-0 mt-0">
           <ScrollArea className="h-full">
             <div className="p-4 grid grid-cols-4 gap-2">
               {Array.from({ length: 604 }, (_, i) => i + 1).map((page) => (

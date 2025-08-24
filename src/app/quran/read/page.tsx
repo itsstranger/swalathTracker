@@ -157,7 +157,7 @@ export default function ReadQuranPage() {
         isOpen={isSidebarOpen}
         isLoading={isLoading}
       />
-      <div className="flex-1 flex flex-col transition-all duration-300">
+      <div className="flex-1 flex flex-col transition-all duration-300 min-h-0">
         <QuranHeader
           title={readerTitle}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
