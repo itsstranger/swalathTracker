@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { QuranHeader } from '@/components/quran/quran-header';
 import { QuranReader } from '@/components/quran-reader';
 import { QuranSidebar } from '@/components/quran/quran-sidebar';
-import type { Surah } from '@/lib/types';
+import type { Surah, Ayah } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ReadQuranPage() {
@@ -13,6 +13,7 @@ export default function ReadQuranPage() {
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
 
   useEffect(() => {
     async function fetchSurahs() {
@@ -35,6 +36,7 @@ export default function ReadQuranPage() {
 
   const handleSurahSelect = (surah: Surah) => {
     setSelectedSurah(surah);
+    setCurrentAyah(null);
   };
 
   return (
@@ -50,6 +52,9 @@ export default function ReadQuranPage() {
         <QuranHeader
           surah={selectedSurah}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          juz={currentAyah?.juz || null}
+          hizb={currentAyah ? Math.floor(((currentAyah.hizbQuarter -1)/4) + 1) : null}
+          page={currentAyah?.page || null}
         />
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {isLoading || !selectedSurah ? (
@@ -59,7 +64,11 @@ export default function ReadQuranPage() {
               <Skeleton className="h-16 w-full bg-gray-700" />
             </div>
           ) : (
-            <QuranReader surah={selectedSurah} showTranslation={true} />
+            <QuranReader 
+              surah={selectedSurah} 
+              showTranslation={true}
+              onFirstAyahLoad={setCurrentAyah}
+            />
           )}
         </div>
       </div>

@@ -11,9 +11,10 @@ import type { Surah, Ayah } from '@/lib/types';
 interface QuranReaderProps {
   surah: Surah;
   showTranslation: boolean;
+  onFirstAyahLoad: (ayah: Ayah) => void;
 }
 
-export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) => {
+export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation, onFirstAyahLoad }) => {
   const [ayats, setAyats] = useState<{ arabic: Ayah[]; english: Ayah[] }>({ arabic: [], english: [] });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,10 +26,14 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
         const response = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih`);
         const data = await response.json();
         if (data.code === 200) {
+          const arabicAyahs: Ayah[] = data.data[0].ayahs;
           setAyats({
-            arabic: data.data[0].ayahs,
+            arabic: arabicAyahs,
             english: data.data[1].ayahs,
           });
+          if (arabicAyahs.length > 0) {
+            onFirstAyahLoad(arabicAyahs[0]);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch surah data:', error);
@@ -37,7 +42,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
       }
     }
     fetchSurahData();
-  }, [surah]);
+  }, [surah, onFirstAyahLoad]);
 
   return (
     <div className="bg-[#191919] rounded-lg">
