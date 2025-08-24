@@ -16,6 +16,14 @@ interface QuranReaderProps {
   isSingleSurahView: boolean;
 }
 
+const PageBreak = ({ pageNumber }: { pageNumber: number }) => (
+    <div className="flex items-center gap-4 my-8">
+        <Separator className="flex-1 bg-white/20" />
+        <span className="text-sm text-white/70">Page {pageNumber}</span>
+        <Separator className="flex-1 bg-white/20" />
+    </div>
+);
+
 export const QuranReader: FC<QuranReaderProps> = ({
   ayahs,
   translations,
@@ -34,31 +42,45 @@ export const QuranReader: FC<QuranReaderProps> = ({
       <CardContent className="space-y-8 p-4 md:p-8">
         <div className="space-y-6">
           {showTranslation ? (
-            ayahs.map((ayah, index) => (
-              <div key={ayah.number}>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                      <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
-                      <p className="text-2xl font-amiri text-right flex-1" dir="rtl">{ayah.text}</p>
+            ayahs.map((ayah, index) => {
+              const prevAyah = index > 0 ? ayahs[index - 1] : null;
+              const showPageBreak = prevAyah && ayah.page !== prevAyah.page;
+              return (
+                <div key={ayah.number}>
+                  {showPageBreak && <PageBreak pageNumber={ayah.page} />}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
+                        <p className="text-2xl font-amiri text-right flex-1" dir="rtl">{ayah.text}</p>
+                    </div>
+                    <p className="text-white/80 pl-12">
+                      {translations[index]?.text}
+                    </p>
                   </div>
-                  <p className="text-white/80 pl-12">
-                    {translations[index]?.text}
-                  </p>
+                  {index < ayahs.length - 1 && !showPageBreak && <Separator className="my-6 bg-white/20"/>}
                 </div>
-                {index < ayahs.length - 1 && <Separator className="my-6 bg-white/20"/>}
-              </div>
-            ))
+              );
+            })
           ) : (
-            <p className="text-3xl font-amiri text-right leading-loose text-justify" dir="rtl">
-              {ayahs.map((ayah) => (
-                <span key={ayah.numberInSurah}>
-                  {ayah.text}
-                  <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-8 h-8 leading-8 text-center font-sans">
-                      {ayah.numberInSurah.toLocaleString('ar-EG')}
-                  </span>
-                </span>
-              ))}
-            </p>
+             <div className="text-3xl font-amiri text-right leading-loose text-justify" dir="rtl">
+              {ayahs.map((ayah, index) => {
+                  const prevAyah = index > 0 ? ayahs[index - 1] : null;
+                  const showPageBreak = prevAyah && ayah.page !== prevAyah.page;
+                  return (
+                      <span key={ayah.numberInSurah}>
+                          {showPageBreak && (
+                              <span className="inline-block w-full text-center" dir="ltr">
+                                  <PageBreak pageNumber={ayah.page} />
+                              </span>
+                          )}
+                          {ayah.text}
+                          <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-8 h-8 leading-8 text-center font-sans">
+                              {ayah.numberInSurah.toLocaleString('ar-EG')}
+                          </span>
+                      </span>
+                  );
+              })}
+            </div>
           )}
         </div>
       </CardContent>
