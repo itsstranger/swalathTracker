@@ -70,22 +70,35 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
             <Skeleton className="h-16 w-full" />
           </div>
         ) : (
-          ayats.arabic.map((ayah, index) => (
-            <div key={ayah.number}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
-                    <p className="text-2xl font-arabic text-right flex-1" dir="rtl">{ayah.text}</p>
+          <div className="space-y-6">
+            {!showTranslation ? (
+              <p className="text-3xl font-arabic text-right leading-loose" dir="rtl">
+                {ayats.arabic.map((ayah, index) => (
+                  <span key={ayah.numberInSurah}>
+                    {ayah.text.replace(/ ([^ ]*)$/, '\u00A0$1')}
+                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-7 h-7 leading-7 text-center">
+                        {ayah.numberInSurah.toLocaleString('ar-EG')}
+                    </span>
+                  </span>
+                ))}
+              </p>
+            ) : (
+              ayats.arabic.map((ayah, index) => (
+                <div key={ayah.number}>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
+                        <p className="text-2xl font-arabic text-right flex-1" dir="rtl">{ayah.text}</p>
+                    </div>
+                    <p className="text-white/80 pl-12">
+                      {ayats.english[index]?.text}
+                    </p>
+                  </div>
+                  {index < ayats.arabic.length - 1 && <Separator className="my-6 bg-white/20"/>}
                 </div>
-                {showTranslation && (
-                  <p className="text-white/80 pl-12">
-                    {ayats.english[index]?.text}
-                  </p>
-                )}
-              </div>
-              {index < ayats.arabic.length - 1 && <Separator className="my-6 bg-white/20"/>}
-            </div>
-          ))
+              ))
+            )}
+          </div>
         )}
       </CardContent>
     </GlassCard>
