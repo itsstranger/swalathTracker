@@ -168,7 +168,7 @@ export default function ReadQuranPage() {
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
         />
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-2xl mx-auto">
             {isReaderLoading && ayahs.length === 0 ? (
               <div className="space-y-6">
                 <Skeleton className="h-16 w-full bg-gray-700" />
