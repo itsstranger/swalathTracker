@@ -18,6 +18,7 @@ export default function ReadQuranPage() {
   const [isReaderLoading, setIsReaderLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
+  const [showTranslation, setShowTranslation] = useState(true);
 
   useEffect(() => {
     async function fetchSurahs() {
@@ -106,6 +107,8 @@ export default function ReadQuranPage() {
           juz={currentAyah?.juz || null}
           hizb={currentAyah ? Math.floor(((currentAyah.hizbQuarter -1)/4) + 1) : null}
           page={currentAyah?.page || null}
+          showTranslation={showTranslation}
+          onToggleTranslation={() => setShowTranslation(!showTranslation)}
         />
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {isReaderLoading ? (
@@ -118,7 +121,7 @@ export default function ReadQuranPage() {
             <QuranReader 
               ayahs={ayahs}
               translations={translations}
-              showTranslation={true}
+              showTranslation={showTranslation}
               onFirstAyahLoad={setCurrentAyah}
               surahName={selectedSurah?.name}
               isSingleSurahView={!!selectedSurah}
