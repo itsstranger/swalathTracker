@@ -125,7 +125,7 @@ export default function ReadQuranPage() {
     setCurrentPage(1);
     setHasMore(true);
     setIsReaderLoading(true);
-    setReaderTitle(`${surah.englishName} (${surah.englishNameTranslation})`);
+    setReaderTitle(surah.englishName);
     fetchSurahVerses(surah.number, 1);
   };
 
