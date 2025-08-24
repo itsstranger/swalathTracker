@@ -24,6 +24,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
+import { usePathname } from 'next/navigation';
 
 export const BottomNav = () => {
   const isFormSheetOpen = useSwalathStore((state) => state.isFormSheetOpen);
@@ -54,6 +55,7 @@ export const BottomNav = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
   const selectedEntry = getSelectedEntry();
+  const pathname = usePathname();
 
   const handleSave = (entry: SwalathEntry) => {
     addOrUpdateEntry(entry);
@@ -75,6 +77,14 @@ export const BottomNav = () => {
   
   const entryDate = selectedEntryId ? parseDateAsLocal(selectedEntryId) : new Date();
 
+  const navLinks = [
+    { href: '/', label: 'Dashboard', icon: Home },
+    { href: '/prayers', label: 'Prayers', icon: ShieldCheck },
+    { href: '/quran', label: 'Quran', icon: BookOpen },
+    { href: '/duas', label: 'Duas', icon: Moon },
+    { href: '/swalath', label: 'Swalath Counter', icon: Bot },
+  ];
+
   return (
     <>
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -87,41 +97,30 @@ export const BottomNav = () => {
               <Menu className={cn("transition-transform duration-300", { "rotate-90": isFabMenuOpen })} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2 mb-2" align="center" side="top">
-            <div className="flex flex-col gap-2">
-               <Link href="/" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <Home className="mr-2" />
-                  Dashboard
-                </Button>
-              </Link>
-               <Link href="/prayers" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <ShieldCheck className="mr-2" />
-                  Prayers
-                </Button>
-              </Link>
-               <Link href="/quran" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <BookOpen className="mr-2" />
-                  Quran
-                </Button>
-              </Link>
-               <Link href="/duas" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <Moon className="mr-2" />
-                  Duas
-                </Button>
-              </Link>
-              <Link href="/swalath" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <Bot className="mr-2" />
-                  Swalath Counter
-                </Button>
-              </Link>
+          <PopoverContent className="w-64 p-2 mb-2 rounded-2xl" align="center" side="top">
+            <div className="flex flex-col gap-1">
+              {navLinks.map(({ href, label, icon: Icon }) => (
+                <Link href={href} passHref key={href}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsFabMenuOpen(false)}
+                    className={cn(
+                      "w-full justify-start h-12 text-base",
+                      pathname === href && "border-2 border-primary text-primary font-semibold"
+                    )}
+                  >
+                    <Icon className="mr-4" />
+                    {label}
+                  </Button>
+                </Link>
+              ))}
               <Link href="/settings" passHref>
-                <Button variant="ghost" onClick={() => setIsFabMenuOpen(false)} className="w-full justify-start">
-                  <Settings className="mr-2" />
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsFabMenuOpen(false)}
+                  className="w-full justify-start h-12 text-base mt-2 bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+                >
+                  <Settings className="mr-4" />
                   Settings
                 </Button>
               </Link>
