@@ -56,6 +56,12 @@ export const BottomNav = () => {
   
   const selectedEntry = getSelectedEntry();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   const isQuranReaderPage = pathname === '/quran/read';
 
   const handleSave = (entry: SwalathEntry) => {
@@ -86,6 +92,9 @@ export const BottomNav = () => {
     { href: '/swalath', label: 'Swalath Counter', icon: Bot },
   ];
   
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
