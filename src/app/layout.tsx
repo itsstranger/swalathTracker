@@ -29,9 +29,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <AuthProvider>
-          <div className="pb-20">
-            {children}
-          </div>
+          {children}
           <BottomNav />
           <Toaster />
         </AuthProvider>

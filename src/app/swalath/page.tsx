@@ -32,7 +32,7 @@ export default function SwalathTrackerPage() {
   }
   
   return (
-    <main className="min-h-screen font-body">
+    <main className="min-h-screen font-body pb-20">
       <div className="container mx-auto p-4 md:p-6">
         <Header />
         <div className="mt-6 flex justify-center">
