@@ -57,7 +57,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
   return (
     <GlassCard>
       <CardHeader className="text-center">
-        <CardTitle className={cn("text-4xl font-amiri-quran", !showTranslation && "font-arabic")}>{surah.name}</CardTitle>
+        <CardTitle className={cn("text-4xl font-amiri-quran")}>{surah.name}</CardTitle>
         <CardDescription className="text-white/80 text-xl font-headline">
           {surah.englishName} ({surah.englishNameTranslation})
         </CardDescription>
@@ -73,11 +73,11 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
         ) : (
           <div className="space-y-6">
             {!showTranslation ? (
-              <p className="text-3xl font-amiri-quran text-right leading-loose" dir="rtl">
+              <p className="text-3xl font-amiri-quran text-right leading-loose text-justify" dir="rtl">
                 {ayats.arabic.map((ayah) => (
                   <span key={ayah.numberInSurah}>
-                    {ayah.text.replace(/ ([^ ]*)$/, '\u00A0$1')}
-                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-7 h-7 leading-7 text-center font-sans">
+                    {ayah.text}
+                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-8 h-8 leading-8 text-center font-sans">
                         {ayah.numberInSurah.toLocaleString('ar-EG')}
                     </span>
                   </span>
