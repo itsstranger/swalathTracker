@@ -21,8 +21,8 @@ export default function QuranPage() {
     }, []);
 
     return (
-        <main className="min-h-screen font-body pb-20">
-            <div className="container mx-auto p-4 md:p-6">
+        <main className="min-h-screen font-body">
+            <div className="container mx-auto p-4 md:p-6 pb-20">
                 <Header />
                 <div className="mt-6 flex justify-center">
                     <div className="w-full md:w-3/4 space-y-6">
