@@ -43,7 +43,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
   }
 
   return (
-    <aside className="w-80 bg-[#191919] border-r border-white/10 flex flex-col h-screen">
+    <aside className="w-80 bg-[#191919] border-r border-white/10 flex flex-col h-full">
       <div className="p-4 border-b border-white/10">
         <Button variant="ghost" className="w-full justify-between">
           <span>{selectedSurah?.englishName || 'Select Surah'}</span>
@@ -51,7 +51,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
         </Button>
       </div>
       
-      <Tabs defaultValue="surah" className="flex-1 flex flex-col">
+      <Tabs defaultValue="surah" className="flex-1 flex flex-col min-h-0">
         <TabsList className="grid w-full grid-cols-3 bg-transparent p-4">
           <TabsTrigger value="surah">Surah</TabsTrigger>
           <TabsTrigger value="juz">Juz</TabsTrigger>
@@ -93,7 +93,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </ScrollArea>
         </TabsContent>
         
-        <TabsContent value="juz" className="flex-1">
+        <TabsContent value="juz" className="flex-1 min-h-0">
           <ScrollArea className="h-full">
             <div className="p-4 grid grid-cols-3 gap-2">
               {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
@@ -105,7 +105,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="page" className="flex-1">
+        <TabsContent value="page" className="flex-1 min-h-0">
           <ScrollArea className="h-full">
             <div className="p-4 grid grid-cols-4 gap-2">
               {Array.from({ length: 604 }, (_, i) => i + 1).map((page) => (

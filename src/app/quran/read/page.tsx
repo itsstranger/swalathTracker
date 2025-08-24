@@ -90,7 +90,7 @@ export default function ReadQuranPage() {
   }
 
   return (
-    <main className="min-h-screen font-body flex bg-[#111111] text-white">
+    <main className="h-screen font-body flex bg-[#111111] text-white overflow-hidden">
       <QuranSidebar
         surahs={surahs}
         selectedSurah={selectedSurah}
