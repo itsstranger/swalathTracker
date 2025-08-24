@@ -2,18 +2,21 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { ChevronDown, ChevronsLeft } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import type { Surah } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface QuranSidebarProps {
   surahs: Surah[];
   selectedSurah: Surah | null;
   onSurahSelect: (surah: Surah) => void;
+  onJuzSelect: (juz: number) => void;
+  onPageSelect: (page: number) => void;
   isOpen: boolean;
   isLoading: boolean;
 }
@@ -22,6 +25,8 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
   surahs,
   selectedSurah,
   onSurahSelect,
+  onJuzSelect,
+  onPageSelect,
   isOpen,
   isLoading,
 }) => {
@@ -45,42 +50,73 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           <ChevronDown className="w-4 h-4" />
         </Button>
       </div>
-      <div className="p-4">
-        {/* Placeholder for Tabs */}
-        <div className="text-sm text-center text-white/70 p-2 border-b-2 border-primary">Surah</div>
-      </div>
-      <div className="p-4">
-        <Input
-          placeholder="Search Surah"
-          className="bg-black/20 border-white/10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-2">
-          {isLoading ? (
-            Array.from({ length: 10 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full bg-gray-700" />
-            ))
-          ) : (
-            filteredSurahs.map((surah) => (
-              <Button
-                key={surah.number}
-                variant="ghost"
-                className={cn(
-                  'w-full justify-start',
-                  selectedSurah?.number === surah.number && 'bg-primary/20 text-primary'
-                )}
-                onClick={() => onSurahSelect(surah)}
-              >
-                <span className="text-sm text-white/50 w-8">{surah.number}</span>
-                <span>{surah.englishName}</span>
-              </Button>
-            ))
-          )}
-        </div>
-      </ScrollArea>
+      
+      <Tabs defaultValue="surah" className="flex-1 flex flex-col">
+        <TabsList className="grid w-full grid-cols-3 bg-transparent p-4">
+          <TabsTrigger value="surah">Surah</TabsTrigger>
+          <TabsTrigger value="juz">Juz</TabsTrigger>
+          <TabsTrigger value="page">Page</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="surah" className="flex-1 flex flex-col min-h-0">
+          <div className="p-4">
+            <Input
+              placeholder="Search Surah"
+              className="bg-black/20 border-white/10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-2">
+              {isLoading ? (
+                Array.from({ length: 10 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full bg-gray-700" />
+                ))
+              ) : (
+                filteredSurahs.map((surah) => (
+                  <Button
+                    key={surah.number}
+                    variant="ghost"
+                    className={cn(
+                      'w-full justify-start',
+                      selectedSurah?.number === surah.number && 'bg-primary/20 text-primary'
+                    )}
+                    onClick={() => onSurahSelect(surah)}
+                  >
+                    <span className="text-sm text-white/50 w-8">{surah.number}</span>
+                    <span>{surah.englishName}</span>
+                  </Button>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="juz" className="flex-1">
+          <ScrollArea className="h-full">
+            <div className="p-4 grid grid-cols-3 gap-2">
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
+                <Button key={juz} variant="outline" className="bg-transparent border-white/20" onClick={() => onJuzSelect(juz)}>
+                  Juz {juz}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="page" className="flex-1">
+          <ScrollArea className="h-full">
+            <div className="p-4 grid grid-cols-4 gap-2">
+              {Array.from({ length: 604 }, (_, i) => i + 1).map((page) => (
+                <Button key={page} variant="outline" size="sm" className="bg-transparent border-white/20" onClick={() => onPageSelect(page)}>
+                  {page}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
     </aside>
   );
 };
