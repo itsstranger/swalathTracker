@@ -33,12 +33,14 @@ export default function QuranPage() {
                             </CardHeader>
                         </GlassCard>
                         
-                        <Link href="/quran/read" passHref>
-                          <Button size="lg" variant="outline" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                              <BookUp className="mr-2" />
-                              Read Quran
-                          </Button>
-                        </Link>
+                        <div>
+                            <Link href="/quran/read" passHref>
+                              <Button size="lg" variant="outline" className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                                  <BookUp className="mr-2" />
+                                  Read Quran
+                              </Button>
+                            </Link>
+                        </div>
 
                         {isInitialized ? (
                             <QuranTracker isFriday={isFriday} />
