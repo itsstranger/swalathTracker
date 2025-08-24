@@ -51,7 +51,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
         </Button>
       </div>
       
-      <Tabs defaultValue="surah" className="flex-1 flex flex-col min-h-0">
+      <Tabs defaultValue="surah" className="flex flex-col flex-1 min-h-0">
         <div className="px-4 pt-4">
           <TabsList className="grid w-full grid-cols-3 bg-transparent">
             <TabsTrigger value="surah">Surah</TabsTrigger>
@@ -60,7 +60,7 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </TabsList>
         </div>
         
-        <TabsContent value="surah" className="flex-1 flex flex-col min-h-0 mt-0">
+        <TabsContent value="surah" className="flex flex-col flex-1 min-h-0 mt-0">
           <div className="p-4">
             <Input
               placeholder="Search Surah"
@@ -97,20 +97,17 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
           </div>
         </TabsContent>
         
-        <TabsContent value="juz" className="flex-1 min-h-0 mt-0">
-          <ScrollArea className="h-full">
-            <div className="p-4 grid grid-cols-3 gap-2">
-              {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
-                <Button key={juz} variant="outline" className="bg-transparent border-white/20" onClick={() => onJuzSelect(juz)}>
-                  Juz {juz}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
+        <TabsContent value="juz" className="flex-1 overflow-y-auto mt-0">
+          <div className="p-4 grid grid-cols-3 gap-2">
+            {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
+              <Button key={juz} variant="outline" className="bg-transparent border-white/20" onClick={() => onJuzSelect(juz)}>
+                Juz {juz}
+              </Button>
+            ))}
+          </div>
         </TabsContent>
 
-        <TabsContent value="page" className="flex-1 min-h-0 mt-0">
-          <ScrollArea className="h-full">
+        <TabsContent value="page" className="flex-1 overflow-y-auto mt-0">
             <div className="p-4 grid grid-cols-4 gap-2">
               {Array.from({ length: 604 }, (_, i) => i + 1).map((page) => (
                 <Button key={page} variant="outline" size="sm" className="bg-transparent border-white/20" onClick={() => onPageSelect(page)}>
@@ -118,7 +115,6 @@ export const QuranSidebar: FC<QuranSidebarProps> = ({
                 </Button>
               ))}
             </div>
-          </ScrollArea>
         </TabsContent>
       </Tabs>
     </aside>
