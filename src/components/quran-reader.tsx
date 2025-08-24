@@ -6,6 +6,7 @@ import { GlassCard } from './glass-card';
 import { CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Skeleton } from './ui/skeleton';
 import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
 
 interface Surah {
   number: number;
@@ -56,7 +57,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
   return (
     <GlassCard>
       <CardHeader className="text-center">
-        <CardTitle className="font-arabic text-4xl">{surah.name}</CardTitle>
+        <CardTitle className={cn("text-4xl font-amiri-quran", !showTranslation && "font-arabic")}>{surah.name}</CardTitle>
         <CardDescription className="text-white/80 text-xl font-headline">
           {surah.englishName} ({surah.englishNameTranslation})
         </CardDescription>
@@ -72,11 +73,11 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
         ) : (
           <div className="space-y-6">
             {!showTranslation ? (
-              <p className="text-3xl font-arabic text-right leading-loose" dir="rtl">
-                {ayats.arabic.map((ayah, index) => (
+              <p className="text-3xl font-amiri-quran text-right leading-loose" dir="rtl">
+                {ayats.arabic.map((ayah) => (
                   <span key={ayah.numberInSurah}>
                     {ayah.text.replace(/ ([^ ]*)$/, '\u00A0$1')}
-                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-7 h-7 leading-7 text-center">
+                    <span className="inline-block mx-2 text-sm text-primary border border-primary rounded-full w-7 h-7 leading-7 text-center font-sans">
                         {ayah.numberInSurah.toLocaleString('ar-EG')}
                     </span>
                   </span>
@@ -88,7 +89,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
-                        <p className="text-2xl font-arabic text-right flex-1" dir="rtl">{ayah.text}</p>
+                        <p className="text-2xl font-amiri-quran text-right flex-1" dir="rtl">{ayah.text}</p>
                     </div>
                     <p className="text-white/80 pl-12">
                       {ayats.english[index]?.text}

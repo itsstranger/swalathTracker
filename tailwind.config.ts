@@ -21,6 +21,7 @@ export default {
         headline: ['Alegreya', 'serif'],
         code: ['monospace'],
         arabic: ['"Noto Naskh Arabic"', 'serif'],
+        'amiri-quran': ['"Amiri Quran"', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
