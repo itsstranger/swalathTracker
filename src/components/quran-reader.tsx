@@ -57,7 +57,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
   return (
     <GlassCard>
       <CardHeader className="text-center">
-        <CardTitle className={cn("text-4xl font-amiri-quran")}>{surah.name}</CardTitle>
+        <CardTitle className={cn("text-4xl font-amiri")}>{surah.name}</CardTitle>
         <CardDescription className="text-white/80 text-xl font-headline">
           {surah.englishName} ({surah.englishNameTranslation})
         </CardDescription>
@@ -73,7 +73,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
         ) : (
           <div className="space-y-6">
             {!showTranslation ? (
-              <p className="text-3xl font-amiri-quran text-right leading-loose text-justify" dir="rtl">
+              <p className="text-3xl font-amiri text-right leading-loose text-justify" dir="rtl">
                 {ayats.arabic.map((ayah) => (
                   <span key={ayah.numberInSurah}>
                     {ayah.text}
@@ -89,7 +89,7 @@ export const QuranReader: FC<QuranReaderProps> = ({ surah, showTranslation }) =>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/20 text-primary font-bold">{ayah.numberInSurah}</span>
-                        <p className="text-2xl font-amiri-quran text-right flex-1" dir="rtl">{ayah.text}</p>
+                        <p className="text-2xl font-amiri text-right flex-1" dir="rtl">{ayah.text}</p>
                     </div>
                     <p className="text-white/80 pl-12">
                       {ayats.english[index]?.text}
