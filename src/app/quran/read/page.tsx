@@ -181,7 +181,7 @@ export default function ReadQuranPage() {
                 translations={translations}
                 showTranslation={showTranslation}
                 onFirstAyahLoad={setCurrentAyah}
-                surahName={selectedSurah?.name}
+                surah={selectedSurah}
                 isSingleSurahView={!!selectedSurah}
               />
               {isFetchingMore && (

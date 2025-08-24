@@ -4,7 +4,6 @@
 import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, Settings, Search } from 'lucide-react';
-import type { Surah } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Label } from '../ui/label';
