@@ -12,7 +12,7 @@ import { TodaysProgress } from '@/components/todays-progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Moon, ShieldCheck, Bot } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { GlassCard } from '@/components/glass-card';
 
 export default function Home() {
@@ -20,11 +20,19 @@ export default function Home() {
   const { prayerData, isInitialized: prayersInitialized } = usePrayerTracker();
   const { quranData, isInitialized: quranInitialized } = useQuranTracker();
   const { duaData, isInitialized: duasInitialized } = useDuaTracker();
-  
-  const today = new Date().toISOString().split('T')[0];
-  const todaysSwalathEntry = entries.find(e => e.id === today) || null;
+  const [isMounted, setIsMounted] = useState(false);
 
-  const isDataReady = prayersInitialized && quranInitialized && duasInitialized;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  const todaysSwalathEntry = useMemo(() => {
+    if (!isMounted) return null;
+    const today = new Date().toISOString().split('T')[0];
+    return entries.find(e => e.id === today) || null;
+  }, [entries, isMounted]);
+
+  const isDataReady = prayersInitialized && quranInitialized && duasInitialized && isMounted;
 
   const { completedPrayers, totalPrayers } = useMemo(() => {
     if (!prayerData) return { completedPrayers: 0, totalPrayers: 5 };
@@ -65,7 +73,7 @@ export default function Home() {
                             <CardTitle className="flex items-center gap-2"><ShieldCheck /> Prayers</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {prayersInitialized ? (
+                            {isDataReady ? (
                                 <p className="text-2xl font-bold">{completedPrayers} <span className="text-base font-normal text-white/70">/ {totalPrayers} obligatory</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
@@ -77,7 +85,7 @@ export default function Home() {
                             <CardTitle className="flex items-center gap-2"><BookOpen /> Quran</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {quranInitialized && quranData ? (
+                            {isDataReady && quranData ? (
                                 <p className="text-2xl font-bold">{quranData.pagesRead} <span className="text-base font-normal text-white/70">/ {quranData.dailyGoalPages} pages</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
@@ -89,7 +97,7 @@ export default function Home() {
                             <CardTitle className="flex items-center gap-2"><Moon /> Duas</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {duasInitialized ? (
+                            {isDataReady ? (
                                  <p className="text-2xl font-bold">{completedDuas} <span className="text-base font-normal text-white/70">/ {totalDuas} daily</span></p>
                             ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
@@ -101,7 +109,9 @@ export default function Home() {
                             <CardTitle className="flex items-center gap-2"><Bot /> Swalath</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{todaysSwalathEntry?.total ?? 0} <span className="text-base font-normal text-white/70">today</span></p>
+                            {isDataReady ? (
+                              <p className="text-2xl font-bold">{todaysSwalathEntry?.total ?? 0} <span className="text-base font-normal text-white/70">today</span></p>
+                            ) : <Skeleton className="h-8 w-24" />}
                         </CardContent>
                     </GlassCard>
                 </Link>
